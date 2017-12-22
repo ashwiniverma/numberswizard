@@ -97,6 +97,11 @@ public class NumberWizardBySpeechlet implements Speechlet {
 
             String gameName = (String)session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
 
+            if (null == gameName) {
+                gameName = GameType.ADDITION.name();
+                session.setAttribute(GAME_NAME_SESSION_ATTRIBUTE, gameName);
+            }
+
             Triple triple = MathHelper.getTheGameForLevel(gameName, gameLevel);
             session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getLeft());
 
@@ -110,6 +115,16 @@ public class NumberWizardBySpeechlet implements Speechlet {
             String gameName = (String)session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
             String gameLevel = (String)session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);
             String gameResult = (String)session.getAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE);
+
+            if (null == gameName) {
+                gameName = GameType.ADDITION.name();
+                session.setAttribute(GAME_NAME_SESSION_ATTRIBUTE, gameName);
+            }
+
+            if (null == gameLevel) {
+                gameName = "easy";
+                session.setAttribute(GAME_LEVEL_SESSION_ATTRIBUTE,gameLevel);
+            }
 
             Triple triple = MathHelper.getTheGameForLevel(gameName, gameLevel);
             session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getLeft());
