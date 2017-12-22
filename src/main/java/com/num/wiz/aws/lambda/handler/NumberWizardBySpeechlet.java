@@ -88,12 +88,14 @@ public class NumberWizardBySpeechlet implements Speechlet {
         } else if (GAME_NAME_INTENT.equals(intentName)) { // Choose game type (+,-,*,/) intent
             String gameName = intent.getSlot(GAME_NAME_INTENT_SLOT).getValue();
             session.setAttribute(GAME_NAME_SESSION_ATTRIBUTE,gameName);
+            logger.info("onIntent gameName={}",gameName);
 
             return getAskResponse(CARD_TITLE, GAME_LEVEL_TEXT);
 
         } else if (GAME_LEVEL_INTENT.equals(intentName)) { // Choose game level (high,medium,easy) intent
             String gameLevel = intent.getSlot(GAME_LEVEL_INTENT_SLOT).getValue();
             session.setAttribute(GAME_LEVEL_SESSION_ATTRIBUTE,gameLevel);
+            logger.info("onIntent gameLevel={}",gameLevel);
 
             String gameName = (String)session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
 
@@ -114,7 +116,8 @@ public class NumberWizardBySpeechlet implements Speechlet {
 
             String gameName = (String)session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
             String gameLevel = (String)session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);
-            String gameResult = (String)session.getAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE);
+            int gameResult = (Integer)session.getAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE);
+            logger.info("onIntent {} gameName={}, gameLevel={}, gameResult={}",GAME_RESULT_INTENT, gameName, gameLevel, gameResult);
 
             if (null == gameName) {
                 gameName = GameType.ADDITION.name();
@@ -130,7 +133,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
             session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getLeft());
 
             String response;
-            if(userGameResultValue == gameResult) { // if answer is correct
+            if(userGameResultValue.equalsIgnoreCase(String.valueOf(gameResult))) { // if answer is correct
                 //TODO add and update the score
                 response = String.format(GAME_RESULT_CORRECT_TEXT + CONTINUE_GAME_TEXT, gameResult, triple.getLeft(), GAME_JARGAN_MAP.get(gameName.toUpperCase()), triple.getMiddle());
             } else {

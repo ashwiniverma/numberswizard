@@ -33,14 +33,17 @@ public class MathHelper {
                 leftValue = getSingleDigitNumber();
                 rightValue = getSingleDigitNumber();
                 result = leftValue + rightValue;
+                break;
             case "medium" :
                 leftValue = getDoubleDigitNumber();
                 rightValue = getDoubleDigitNumber();
                 result = leftValue + rightValue;
+                break;
             case "hard" :
                 leftValue = getTripleDigitNumber();
                 rightValue = getTripleDigitNumber();
                 result = leftValue + rightValue;
+                break;
         }
         triple = new ImmutableTriple(leftValue,rightValue,result);
         return triple;
@@ -56,15 +59,18 @@ public class MathHelper {
                 leftValue = getSingleDigitNumber();
                 rightValue = getSingleDigitNumber();
                 result = leftValue * rightValue;
+                break;
             case "medium" : {
                 leftValue = getDoubleDigitNumber();
                 rightValue = getDoubleDigitNumber();
                 result = leftValue * rightValue;
+                break;
             }
             case "hard" :
                 leftValue = getTripleDigitNumber();
                 rightValue = getTripleDigitNumber();
                 result = leftValue * rightValue;
+                break;
         }
         triple = new ImmutableTriple(leftValue,rightValue,result);
         return triple;
@@ -80,14 +86,17 @@ public class MathHelper {
                 leftValue = getSingleDigitNumber();
                 rightValue = getSingleDigitNumber();
                 result = leftValue - rightValue;
+                break;
             case "medium" :
                 leftValue = getDoubleDigitNumber();
                 rightValue = getDoubleDigitNumber();
                 result = leftValue - rightValue;
+                break;
             case "hard" :
                 leftValue = getTripleDigitNumber();
                 rightValue = getTripleDigitNumber();
                 result = leftValue - rightValue;
+                break;
         }
         triple = new ImmutableTriple(leftValue,rightValue,result);
         return triple;
@@ -103,14 +112,17 @@ public class MathHelper {
                 leftValue = getSingleDigitNumber();
                 rightValue = getSingleDigitNumber();
                 result = leftValue / rightValue;
+                break;
             case "medium" :
                 leftValue = getDoubleDigitNumber();
                 rightValue = getDoubleDigitNumber();
                 result = leftValue / rightValue;
+                break;
             case "hard" :
                 leftValue = getTripleDigitNumber();
                 rightValue = getTripleDigitNumber();
                 result = leftValue / rightValue;
+                break;
         }
         triple = new ImmutableTriple(leftValue,rightValue,result);
         return triple;
