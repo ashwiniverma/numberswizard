@@ -1,0 +1,12 @@
+SlotType: LIST_OF_GAMES
+SlotValues:
+            addition
+            multiplication
+            subtraction
+            division
+
+SlotType: LIST_OF_GAME_LEVEL
+SlotValues:
+            high
+            medium
+            low

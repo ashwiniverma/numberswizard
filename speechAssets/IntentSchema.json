@@ -1,0 +1,52 @@
+{
+  "intents": [
+    {
+      "slots": [
+        {
+          "name": "USNickName",
+          "type": "AMAZON.US_FIRST_NAME"
+        }
+      ],
+      "intent": "NickNameCapture"
+    },
+    {
+      "slots": [
+        {
+          "name": "GameNames",
+          "type": "LIST_OF_GAMES"
+        }
+      ],
+      "intent": "GameNameCapture"
+    },
+    {
+      "slots": [
+        {
+          "name": "GameLevel",
+          "type": "LIST_OF_GAME_LEVEL"
+        }
+      ],
+      "intent": "GameLevelCapture"
+    },
+    {
+      "slots": [
+        {
+          "name": "GameResult",
+          "type": "AMAZON.NUMBER"
+        }
+      ],
+      "intent": "GameStarted"
+    },
+    {
+      "intent": "AMAZON.NoIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    }
+  ]
+}

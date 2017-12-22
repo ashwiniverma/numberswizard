@@ -1,0 +1,21 @@
+NickNameCapture my first name is {USNickName}
+NickNameCapture my nick name is {USNickName}
+NickNameCapture I am {USNickName}
+NickNameCapture {USNickName} here
+NickNameCapture this is {USNickName}
+GameNameCapture play {GameNames} game
+GameNameCapture {GameNames}
+GameNameCapture begin with {GameNames}
+GameNameCapture start with {GameNames}
+GameLevelCapture {GameLevel}
+GameLevelCapture level {GameLevel}
+GameLevelCapture begin with {GameLevel}
+GameLevelCapture begin with level {GameLevel}
+GameLevelCapture start with {GameLevel}
+GameLevelCapture start with level {GameLevel}
+GameLevelCapture I want difficulty level {GameLevel}
+GameStarted result is {GameResult}
+GameStarted answer is {GameResult}
+GameStarted correct answer is {GameResult}
+GameStarted {GameResult}
+GameStarted correct value is {GameResult}

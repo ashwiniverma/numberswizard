@@ -26,16 +26,16 @@ public class NumberWizardBySpeechlet implements Speechlet {
     private static final Map<String, String> GAME_JARGAN_MAP = new HashMap(4);
 
     /** INTENT NAMES **/
-    private static final String NICK_NAME_INTENT = "nickname";
-    private static final String GAME_NAME_INTENT = "gamename";
-    private static final String GAME_LEVEL_INTENT = "gamelevel";
-    private static final String GAME_RESULT_INTENT = "gamestart";
+    private static final String NICK_NAME_INTENT = "NickNameCapture";
+    private static final String GAME_NAME_INTENT = "GameNameCapture";
+    private static final String GAME_LEVEL_INTENT = "GameLevelCapture";
+    private static final String GAME_RESULT_INTENT = "GameStarted";
 
     /** SLOT NAMES **/
-    public static final String NAME_INTENT_SLOT = "name";
-    public static final String GAME_NAME_INTENT_SLOT = "game_name";
-    public static final String GAME_LEVEL_INTENT_SLOT = "game_level";
-    public static final String GAME_LEVEL_RESULT_INTENT_SLOT = "game_result";
+    public static final String NAME_INTENT_SLOT = "USNickName";
+    public static final String GAME_NAME_INTENT_SLOT = "GameNames";
+    public static final String GAME_LEVEL_INTENT_SLOT = "GameLevel";
+    public static final String GAME_LEVEL_RESULT_INTENT_SLOT = "GameResult";
 
     /** SESSION ATTRIBUTE NAMES **/
     public static final String USER_NAME_SESSION_ATTRIBUTE = "UserName";
@@ -124,10 +124,10 @@ public class NumberWizardBySpeechlet implements Speechlet {
 
             return getAskResponse(CARD_TITLE, response);
 
-        } else if ("AMAZON.HelpIntent".equals(intentName)) {
+        } else if ("AMAZON.HelpIntent".equals(intentName) || "AMAZON.NoIntent".equals(intentName)) {
             return getWelcomeResponse();
 
-        } else if ("AMAZON.StopIntent".equals(intentName)) {
+        } else if ("AMAZON.StopIntent".equals(intentName) || "AMAZON.CancelIntent".equals(intentName)) {
             SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
             outputSpeech.setSsml("<speak>" + "Good Bye, I will let you know your score shortly" + "</speak>");
             return SpeechletResponse.newTellResponse(outputSpeech);
