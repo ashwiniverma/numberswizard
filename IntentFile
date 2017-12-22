@@ -1,0 +1,9 @@
+INTENTS:
+nickname
+gamename
+gamelevel
+gamestart
+
+
+SLOTS:
+GameName Slots = ADDITION,MULTIPLICATION,SUBTRACTION,DIVISION
