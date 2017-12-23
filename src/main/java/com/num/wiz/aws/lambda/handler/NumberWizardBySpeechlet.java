@@ -17,10 +17,10 @@ public class NumberWizardBySpeechlet implements Speechlet {
     private static final String CARD_TITLE = "Number Wizard";
 
     /** TEXT FOR THE INTENTS **/
-    private static final String GAME_PLAY_TEXT = "Hello %s let me know which game you want to play Addition, Subtraction, Multiplication or Division? Please choose one of these.";
+    private static final String GAME_PLAY_TEXT = "Hello %s let me know which game you want to play? Addition, Subtraction, Multiplication or Division? Please choose one of these.";
     private static final String GAME_LEVEL_TEXT = "Great, Please tell me which difficulty level you want? Please choose one from easy, medium and hard by saying I want difficulty level and then the difficulty level.";
     private static final String GAME_START_TEXT = "Sounds Good, In this level you will be challenged to answer %s of numbers. Let's start, what is the result when %s %s %s";
-    private static final String CONTINUE_GAME_TEXT = "%s Alright!! next question, what is the result when %s %s %s";
+    private static final String CONTINUE_GAME_TEXT = "Alright!! next question, what is the result when %s %s %s";
     private static final String GAME_RESULT_CORRECT_TEXT = "You are right, the result is %s.";
     private static final String GAME_RESULT_WRONG_TEXT = "Sorry it's the wrong answer. The correct answer is %s.";
     private static final Map<String, String> GAME_JARGAN_MAP = new HashMap(4);
@@ -44,8 +44,8 @@ public class NumberWizardBySpeechlet implements Speechlet {
     public static final String GAME_TYPE_RESULT_SESSION_ATTRIBUTE = "Result";
 
     private SpeechletResponse getWelcomeResponse() {
-        String speechText = "Welcome to Number Wizard!! The skill that challenges yours Numbering skill on four areas Addition, Subtraction, Multiplication and Division. \n" +
-                "You will be scoring 10 point for each correct answer and 5 points for wrong answer. Based on your points you will be ranked and also achieved the badges starting from Newbie\n" +
+        String speechText = "Welcome to Number Wizard!! The skill that challenges yours Numbering skill on four areas Addition, Subtraction, Multiplication and Division." +
+                "You will be scoring 10 point for each correct answer and 5 points for wrong answer. Based on your points you will be ranked and also achieved the badges starting from Newbie." +
                 "Novice,Graduate,Expert,Master and Guru.  But first, I\\'d like to get to know you better. Tell me your nickname by saying: My nickname is, and then your nickname . ', 'Tell me your name by saying: My nickname is, and then your nickname'.";
 
         if (GAME_JARGAN_MAP.size() != 4) {
