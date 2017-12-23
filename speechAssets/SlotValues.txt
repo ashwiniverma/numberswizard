@@ -9,4 +9,4 @@ SlotType: LIST_OF_GAME_LEVEL
 SlotValues:
             high
             medium
-            low
+            easy
