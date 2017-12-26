@@ -37,6 +37,15 @@
       "intent": "GameStarted"
     },
     {
+      "slots": [
+        {
+          "name": "GameResume",
+          "type": "GAME_STATUS_LIST"
+        }
+      ],
+      "intent": "GameResume"
+    },
+    {
       "intent": "AMAZON.NoIntent"
     },
     {

@@ -19,3 +19,7 @@ GameStarted answer is {GameResult}
 GameStarted correct answer is {GameResult}
 GameStarted {GameResult}
 GameStarted correct value is {GameResult}
+GameResume I want to {GameResume} game
+GameResume I want to start a {GameResume}
+GameResume I want {GameResume}
+GameResume {GameResume}

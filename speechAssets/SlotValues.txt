@@ -7,6 +7,12 @@ SlotValues:
 
 SlotType: LIST_OF_GAME_LEVEL
 SlotValues:
-            high
+            hard
             medium
             easy
+
+SlotType: GAME_STATUS_LIST
+SlotValues:
+            resume
+            new
+
