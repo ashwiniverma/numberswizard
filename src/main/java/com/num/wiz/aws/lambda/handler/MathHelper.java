@@ -9,7 +9,6 @@ public class MathHelper {
 
 
     public static Triple getTheGameForLevel(String gameType, String level) {
-        //TODO Score should also be sent with the results and stored in session or db update if answer is correct
         Triple triple = null;
         if (GameType.ADDITION.name().equalsIgnoreCase(gameType)) {
             triple = getAdditionGame(level);

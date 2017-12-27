@@ -19,7 +19,11 @@ GameStarted answer is {GameResult}
 GameStarted correct answer is {GameResult}
 GameStarted {GameResult}
 GameStarted correct value is {GameResult}
-GameResume I want to {GameResume} game
-GameResume I want to start a {GameResume}
-GameResume I want {GameResume}
-GameResume {GameResume}
+Resume I want to {GameResume} game
+Resume I want to start a {GameResume} game
+Resume I want to start a {GameResume}
+Resume I want {GameResume}
+Resume {GameResume}
+SavedGameStart begin with {GameNames} and level {GameLevel}
+SavedGameStart resume {GameNames} and level {GameLevel}
+SavedGameStart {GameNames} with level {GameLevel}
