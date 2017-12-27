@@ -1,0 +1,3 @@
+Table Name : GAME_RECORD_TABLE
+Primary Key: user_id
+Sort Key   : saved_games
