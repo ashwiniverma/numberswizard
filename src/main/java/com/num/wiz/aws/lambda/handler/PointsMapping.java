@@ -10,7 +10,7 @@ public class PointsMapping {
 
     private static Map<String, Integer> pointsForGameMapping;
     private static Map<String, Pair<Integer,Integer>> pointsForBadgeMapping;
-    private static final String SEPARATOR = ".";
+    protected static final String SEPARATOR = ".";
 
     protected static Map<String, Integer> getPointGameMapping() {
         if(null == pointsForGameMapping){

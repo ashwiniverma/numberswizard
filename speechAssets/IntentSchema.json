@@ -59,6 +59,9 @@
       "intent": "SavedGameStart"
     },
     {
+      "intent": "GetScoreIntent"
+    },
+    {
       "intent": "AMAZON.NoIntent"
     },
     {

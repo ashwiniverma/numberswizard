@@ -44,7 +44,7 @@ public class AwsServiceHelper {
             numberWizardModel.setSaved_games(item.getString("saved_games"));
             numberWizardModel.setUser_id(item.getString("user_id"));
             userDataList.add(numberWizardModel);
-            log.info("Found Records: {}" ,item.toString());
+            log.info("Found Records: {}" ,userDataList);
         }
         return userDataList;
     }

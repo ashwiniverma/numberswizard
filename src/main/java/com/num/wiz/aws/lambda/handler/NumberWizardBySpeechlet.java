@@ -23,12 +23,13 @@ public class NumberWizardBySpeechlet implements Speechlet {
     /** TEXT FOR THE INTENTS **/
     private static final String GAME_PLAY_TEXT = "Hello %s , let me know which game you want to play? Addition, Subtraction, Multiplication or Division? Please choose one of these.";
     private static final String GAME_LEVEL_TEXT = "Great, Please tell me which difficulty level you want? Please choose one from easy, medium and hard by saying I want difficulty level and then the difficulty level.";
-    private static final String GAME_START_TEXT = "Sounds Good, In this level you will be challenged to answer %s of numbers. Let's start, what is the result when %s %s %s";
+    private static final String GAME_START_TEXT = "Sounds Good, In this level you will be challenged to answer %s of numbers. You will be scoring %s points for each correct answers. Let's start, what is the result when %s %s %s";
     private static final String CONTINUE_GAME_TEXT = "Alright!! next question, what is the result when %s %s %s";
     private static final String GAME_RESULT_CORRECT_TEXT = "You are right, the result is %s .";
     private static final String GAME_RESUME_TEXT = "Welcome Back %s , to Number Wizard! Please say New game to start a new game or say resume to continue playing the previous game.";
     private static final String GAME_MESSAGE_TEXT = "Game %s . %s with difficulty level %s .";
-    private static final String SAVED_GAME_START_TEXT = " Please say which game you want o resume? You can start the saved games by saying, game name and then the level . Like, Addition with level Easy .";
+    private static final String SAVED_GAME_START_TEXT = " Please say which game you want to resume? You can start the saved games by saying, game name and then the level . Like, Addition with level Easy .";
+    private static final String GAME_SCORE_TEXT = "Your current score for %s , level %s is %s . You have earned %s badge .";
 
     private static final String GAME_RESULT_WRONG_TEXT = "Sorry it's the wrong answer. The correct answer is %s .";
     private static final Map<String, String> GAME_JARGAN_MAP = new HashMap(4);
@@ -40,6 +41,8 @@ public class NumberWizardBySpeechlet implements Speechlet {
     private static final String GAME_RESULT_INTENT = "GameStarted";
     private static final String GAME_RESUME_INTENT = "Resume";
     private static final String SAVED_GAME_START_INTENT = "SavedGameStart";
+    public static final String GAME_SCORE_INTENT = "GetScoreIntent";
+
 
     /** SLOT NAMES **/
     public static final String NAME_INTENT_SLOT = "USNickName";
@@ -70,7 +73,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
 
     private SpeechletResponse getWelcomeResponse() {
         String speechText = "Welcome to Number Wizard!! The skill that challenges yours Numbering skill on four areas, Addition, Subtraction, Multiplication and Division ." +
-                "You will be scoring 10 point for each correct answer and 5 points for wrong answer. Based on your points you will be ranked and also achieved the badges starting from Newbie," +
+                "You will be scoring points for each correct answer and 0 points for a wrong answer. Based on your points you will be ranked and also achieve the badges starting from Newbie," +
                 "Novice,Graduate,Expert,Master and Guru.  But first, I would like to get to know you better. Tell me your nickname by saying, My nickname is, and then your nickname.";
         return getAskResponse(CARD_TITLE, speechText);
     }
@@ -132,7 +135,8 @@ public class NumberWizardBySpeechlet implements Speechlet {
 
             Triple triple = MathHelper.getTheGameForLevel(gameName, gameLevel);
             session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getRight());
-            session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName+"."+gameLevel);
+            session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName+PointsMapping.SEPARATOR+gameLevel);
+            Integer points = PointsMapping.getPointGameMapping().get(gameName+PointsMapping.SEPARATOR+gameLevel);
 
             String response = String.format(GAME_START_TEXT, gameName, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
 
@@ -143,35 +147,39 @@ public class NumberWizardBySpeechlet implements Speechlet {
 
             String gameName = (String)session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
             String gameLevel = (String)session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);
-            int actualGameResult = (Integer)session.getAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE);
-            logger.info("onIntent {} gameName={}, gameLevel={}, actualGameResult={}",GAME_RESULT_INTENT, gameName, gameLevel, actualGameResult);
-
-            if (null == gameName) {
-                gameName = GameType.ADDITION.name();
-                session.setAttribute(GAME_NAME_SESSION_ATTRIBUTE, gameName);
-            }
-
-            if (null == gameLevel) {
-                gameLevel = GameLevel.easy.name();
-                session.setAttribute(GAME_LEVEL_SESSION_ATTRIBUTE,gameLevel);
-            }
-
-            Triple triple = MathHelper.getTheGameForLevel(gameName, gameLevel);
-            session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getRight());
-
             String response;
-            if(userGameResultValue.equals(String.valueOf(actualGameResult))) { // if answer is correct
+            try {
+                int actualGameResult = (Integer)session.getAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE);
+                logger.info("onIntent {} gameName={}, gameLevel={}, actualGameResult={}",GAME_RESULT_INTENT, gameName, gameLevel, actualGameResult);
 
-                Integer gamePoint = (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
-                gamePoint = getWinningScore(gameName+"."+gameLevel, gamePoint);
-                //INFO add and update the score
-                session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
-                session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName+"."+gameLevel);
+                if (null == gameName) {
+                    gameName = GameType.ADDITION.name();
+                    session.setAttribute(GAME_NAME_SESSION_ATTRIBUTE, gameName);
+                }
 
-                response = String.format(GAME_RESULT_CORRECT_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+                if (null == gameLevel) {
+                    gameLevel = GameLevel.easy.name();
+                    session.setAttribute(GAME_LEVEL_SESSION_ATTRIBUTE,gameLevel);
+                }
 
-            } else {
-                response = String.format(GAME_RESULT_WRONG_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());;
+                Triple triple = MathHelper.getTheGameForLevel(gameName, gameLevel);
+                session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getRight());
+
+                if (userGameResultValue.equals(String.valueOf(actualGameResult))) { // if answer is correct
+
+                    Integer gamePoint = (Integer) session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
+                    gamePoint = getWinningScore(gameName + PointsMapping.SEPARATOR + gameLevel, gamePoint);
+                    //INFO add and update the score
+                    session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
+                    session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName + PointsMapping.SEPARATOR + gameLevel);
+
+                    response = String.format(GAME_RESULT_CORRECT_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+
+                } else {
+                    response = String.format(GAME_RESULT_WRONG_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+                }
+            } catch (NumberFormatException | ClassCastException e) {
+                response = "Sorry !! I could not capture your response. Please try saying again.";
             }
 
             return getAskResponse(CARD_TITLE, response);
@@ -197,7 +205,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
                 }
                 return getAskResponse(CARD_TITLE, gameNames + SAVED_GAME_START_TEXT);
 
-            } else {//shwo the intent to start the new game
+            } else {//show the intent to start the new game
                 return getAskResponse(CARD_TITLE, String.format(GAME_PLAY_TEXT, userNickName));
             }
 
@@ -214,7 +222,21 @@ public class NumberWizardBySpeechlet implements Speechlet {
             return getAskResponse(CARD_TITLE, response);
 
 
-        }  else if ("AMAZON.HelpIntent".equals(intentName) || "AMAZON.NoIntent".equals(intentName)) {
+        } else if (GAME_SCORE_INTENT.equals(intentName)) {
+            Integer gamePoint = (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
+            String gameName = (String)session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
+            String gameLevel = (String)session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);;
+            String badge = PointsMapping.getBadge(gamePoint);
+            logger.info("GAME_SCORE_INTENT Points={} , gameName={} , gameLevel={} and badge={} ",gamePoint,gameName,gameLevel,badge);
+
+            Triple triple = MathHelper.getTheGameForLevel(gameName, gameLevel);
+            session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getRight());
+            String continueGame = String.format(CONTINUE_GAME_TEXT , triple.getLeft() ,getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+            String score = String.format(GAME_SCORE_TEXT, gameName, gameLevel, gamePoint, badge);
+
+            return getAskResponse(CARD_TITLE, score+continueGame);
+
+        } else if ("AMAZON.HelpIntent".equals(intentName) || "AMAZON.NoIntent".equals(intentName)) {
             return getWelcomeResponse();
 
         } else if ("AMAZON.StopIntent".equals(intentName) || "AMAZON.CancelIntent".equals(intentName)) {
