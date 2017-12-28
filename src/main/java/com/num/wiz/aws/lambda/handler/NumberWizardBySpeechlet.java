@@ -21,12 +21,12 @@ public class NumberWizardBySpeechlet implements Speechlet {
     private static final String CARD_TITLE = "Number Wizard";
 
     /** TEXT FOR THE INTENTS **/
-    private static final String GAME_PLAY_TEXT = "Hello %s let me know which game you want to play? Addition, Subtraction, Multiplication or Division? Please choose one of these.";
+    private static final String GAME_PLAY_TEXT = "Hello %s , let me know which game you want to play? Addition, Subtraction, Multiplication or Division? Please choose one of these.";
     private static final String GAME_LEVEL_TEXT = "Great, Please tell me which difficulty level you want? Please choose one from easy, medium and hard by saying I want difficulty level and then the difficulty level.";
     private static final String GAME_START_TEXT = "Sounds Good, In this level you will be challenged to answer %s of numbers. Let's start, what is the result when %s %s %s";
     private static final String CONTINUE_GAME_TEXT = "Alright!! next question, what is the result when %s %s %s";
     private static final String GAME_RESULT_CORRECT_TEXT = "You are right, the result is %s .";
-    private static final String GAME_RESUME_TEXT = "Welcome Back %s to Number Wizard! Please say New game to start a new game or say resume to continue playing the previous game.";
+    private static final String GAME_RESUME_TEXT = "Welcome Back %s , to Number Wizard! Please say New game to start a new game or say resume to continue playing the previous game.";
     private static final String GAME_MESSAGE_TEXT = "Game %s . %s with difficulty level %s .";
     private static final String SAVED_GAME_START_TEXT = " Please say which game you want o resume? You can start the saved games by saying, game name and then the level . Like, Addition with level Easy .";
 
@@ -58,18 +58,20 @@ public class NumberWizardBySpeechlet implements Speechlet {
     public static final String USER_DATA_SESSION_ATTRIBUTE = "userData";
     public static final String CURRENT_GAME_NAME_SESSION_ATTRIBUTE = "currentGameName";
 
-    private SpeechletResponse getWelcomeResponse() {
-        String speechText = "Welcome to Number Wizard!! The skill that challenges yours Numbering skill on four areas, Addition, Subtraction, Multiplication and Division ." +
-                "You will be scoring 10 point for each correct answer and 5 points for wrong answer. Based on your points you will be ranked and also achieved the badges starting from Newbie," +
-                "Novice,Graduate,Expert,Master and Guru.  But first, I would like to get to know you better. Tell me your nickname by saying, My nickname is, and then your nickname.";
-
+    private Map getGameJarganMap() {
         if (GAME_JARGAN_MAP.size() != 4) {
             GAME_JARGAN_MAP.put(GameType.ADDITION.name(), "added to");
             GAME_JARGAN_MAP.put(GameType.SUBTRACTION.name(), "subtracted from");
             GAME_JARGAN_MAP.put(GameType.MULTIPLICATION.name(), "multiplied by");
             GAME_JARGAN_MAP.put(GameType.DIVISION.name(), "divided");
         }
+        return GAME_JARGAN_MAP;
+    }
 
+    private SpeechletResponse getWelcomeResponse() {
+        String speechText = "Welcome to Number Wizard!! The skill that challenges yours Numbering skill on four areas, Addition, Subtraction, Multiplication and Division ." +
+                "You will be scoring 10 point for each correct answer and 5 points for wrong answer. Based on your points you will be ranked and also achieved the badges starting from Newbie," +
+                "Novice,Graduate,Expert,Master and Guru.  But first, I would like to get to know you better. Tell me your nickname by saying, My nickname is, and then your nickname.";
         return getAskResponse(CARD_TITLE, speechText);
     }
 
@@ -86,7 +88,9 @@ public class NumberWizardBySpeechlet implements Speechlet {
         if(userDataList.size() > 0) {
 
             session.setAttribute(USER_DATA_SESSION_ATTRIBUTE, userDataList);
-            return getAskResponse(CARD_TITLE, String.format(GAME_RESUME_TEXT,userDataList.get(0).getNickname()));
+            String nickName = userDataList.get(0).getNickname();
+            session.setAttribute(USER_NAME_SESSION_ATTRIBUTE,nickName);
+            return getAskResponse(CARD_TITLE, String.format(GAME_RESUME_TEXT,nickName));
 
         } else {
             return getWelcomeResponse();
@@ -130,7 +134,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
             session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getRight());
             session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName+"."+gameLevel);
 
-            String response = String.format(GAME_START_TEXT, gameName, triple.getLeft(), GAME_JARGAN_MAP.get(gameName.toUpperCase()), triple.getMiddle());
+            String response = String.format(GAME_START_TEXT, gameName, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
 
             return getAskResponse(CARD_TITLE, response);
 
@@ -164,10 +168,10 @@ public class NumberWizardBySpeechlet implements Speechlet {
                 session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
                 session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName+"."+gameLevel);
 
-                response = String.format(GAME_RESULT_CORRECT_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), GAME_JARGAN_MAP.get(gameName.toUpperCase()), triple.getMiddle());
+                response = String.format(GAME_RESULT_CORRECT_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
 
             } else {
-                response = String.format(GAME_RESULT_WRONG_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), GAME_JARGAN_MAP.get(gameName.toUpperCase()), triple.getMiddle());;
+                response = String.format(GAME_RESULT_WRONG_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());;
             }
 
             return getAskResponse(CARD_TITLE, response);
@@ -183,6 +187,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
                 List<NumberWizardModel> gameList = (List<NumberWizardModel>) session.getAttribute(USER_DATA_SESSION_ATTRIBUTE);
                 int count = 0;
                 String gameNames = "";
+                logger.info("inside GAME_RESUME_INTENT with game list {} ", gameList);
                 for(NumberWizardModel model : gameList) {
                     count++;
                     String gameType = model.getSaved_games().split(".")[0];
@@ -204,7 +209,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
             Triple triple = MathHelper.getTheGameForLevel(savedGameName, savedGameLevel);
             session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getRight());
 
-            String response = String.format(GAME_START_TEXT, savedGameName, triple.getLeft(), GAME_JARGAN_MAP.get(savedGameName.toUpperCase()), triple.getMiddle());
+            String response = String.format(GAME_START_TEXT, savedGameName, triple.getLeft(), getGameJarganMap().get(savedGameName.toUpperCase()), triple.getMiddle());
 
             return getAskResponse(CARD_TITLE, response);
 
@@ -216,6 +221,8 @@ public class NumberWizardBySpeechlet implements Speechlet {
             Integer totalScore = (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
             String badge = PointsMapping.getBadge(totalScore);
             String goodByeMessage = String.format("Good Bye, your total score is {} . And you have earned a {} badge.", totalScore, badge);
+            logger.info("Good Bye Message {}", goodByeMessage);
+            saveRecordToDb(session);
 
             SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
             outputSpeech.setSsml("<speak>" + goodByeMessage + "</speak>");
@@ -234,13 +241,21 @@ public class NumberWizardBySpeechlet implements Speechlet {
         int points;
         Map<String, Integer> pointsForGameMapping = PointsMapping.getPointGameMapping();
         points = pointsForGameMapping.get(gameNameAndLevel);
-        logger.info("Inside getWinningScore method, pointsForGameMapping {} for game name and level {}", pointsForGameMapping, gameNameAndLevel);
+        logger.info("Inside getWinningScore method, for game name and level {}", gameNameAndLevel);
         return points+currentScore;
     }
 
     @Override public void onSessionEnded(SessionEndedRequest sessionEndedRequest, Session session)
             throws SpeechletException {
 
+        logger.info("onSessionEnded requestId={}, sessionId={}",sessionEndedRequest.getRequestId(),session.getSessionId());
+        saveRecordToDb(session);
+
+
+    }
+
+    private void saveRecordToDb(Session session) {
+        logger.info("Inside Save Record to db");
         //INFO get the score and the update the db, also calculate the badge
         String currentGame = (String) session.getAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE);
         String userId = session.getUser().getUserId();
@@ -251,11 +266,10 @@ public class NumberWizardBySpeechlet implements Speechlet {
         numberWizardModel.setUser_id(userId);
         numberWizardModel.setSaved_games(currentGame);
         numberWizardModel.setNickname(nickName);
-        numberWizardModel.setProfile_score(totalScore);
+        numberWizardModel.setProfile_score((null == totalScore) ? 0 : totalScore);
         numberWizardModel.setProfile_badge(PointsMapping.getBadge(totalScore));
         AwsServiceHelper.updateDataIntoDb(numberWizardModel);
-
-        logger.info("onSessionEnded Object Saved={}, sessionId={}", numberWizardModel, session.getSessionId());
+        logger.info("Saved Record to db", numberWizardModel, session.getSessionId());
     }
 
     private SpeechletResponse getAskResponse(String cardTitle, String speechText) {
