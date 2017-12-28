@@ -128,6 +128,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
 
             Triple triple = MathHelper.getTheGameForLevel(gameName, gameLevel);
             session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getRight());
+            session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName+"."+gameLevel);
 
             String response = String.format(GAME_START_TEXT, gameName, triple.getLeft(), GAME_JARGAN_MAP.get(gameName.toUpperCase()), triple.getMiddle());
 
@@ -158,7 +159,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
             if(userGameResultValue.equals(String.valueOf(actualGameResult))) { // if answer is correct
 
                 Integer gamePoint = (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
-                gamePoint = getWinningScore(gameName+gameLevel, gamePoint);
+                gamePoint = getWinningScore(gameName+"."+gameLevel, gamePoint);
                 //INFO add and update the score
                 session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
                 session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName+"."+gameLevel);
@@ -212,8 +213,12 @@ public class NumberWizardBySpeechlet implements Speechlet {
             return getWelcomeResponse();
 
         } else if ("AMAZON.StopIntent".equals(intentName) || "AMAZON.CancelIntent".equals(intentName)) {
+            Integer totalScore = (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
+            String badge = PointsMapping.getBadge(totalScore);
+            String goodByeMessage = String.format("Good Bye, your total score is {} . And you have earned a {} badge.", totalScore, badge);
+
             SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
-            outputSpeech.setSsml("<speak>" + "Good Bye, I will let you know your score shortly" + "</speak>");
+            outputSpeech.setSsml("<speak>" + goodByeMessage + "</speak>");
             return SpeechletResponse.newTellResponse(outputSpeech);
 
         } else {
@@ -229,6 +234,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
         int points;
         Map<String, Integer> pointsForGameMapping = PointsMapping.getPointGameMapping();
         points = pointsForGameMapping.get(gameNameAndLevel);
+        logger.info("Inside getWinningScore method, pointsForGameMapping {} for game name and level {}", pointsForGameMapping, gameNameAndLevel);
         return points+currentScore;
     }
 

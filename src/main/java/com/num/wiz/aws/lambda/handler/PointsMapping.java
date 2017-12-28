@@ -41,18 +41,20 @@ public class PointsMapping {
             pointsForBadgeMapping.put(GameBadge.Graduate.name(),new ImmutablePair<>(501,1000));
             pointsForBadgeMapping.put(GameBadge.Expert.name(),new ImmutablePair<>(1001,3000));
             pointsForBadgeMapping.put(GameBadge.Master.name(),new ImmutablePair<>(3001,6000));
-            pointsForBadgeMapping.put(GameBadge.Guru.name(),new ImmutablePair<>(6001,6001));
+            pointsForBadgeMapping.put(GameBadge.Guru.name(),new ImmutablePair<>(6001,1000000));
         }
         return pointsForBadgeMapping;
     }
 
     protected static String getBadge(Integer gamePoints) {
-        Map<String, Pair<Integer,Integer>>  pointBadgeMappings = getPointBadgeMappings();
+        if (null != gamePoints) {
+            Map<String, Pair<Integer, Integer>> pointBadgeMappings = getPointBadgeMappings();
 
-        for(Map.Entry<String, Pair<Integer,Integer>> entry : pointBadgeMappings.entrySet()) {
-            Pair<Integer,Integer> pointGap = entry.getValue();
-            if(between(gamePoints, pointGap.getLeft(), pointGap.getRight())) {
-                return entry.getKey();
+            for (Map.Entry<String, Pair<Integer, Integer>> entry : pointBadgeMappings.entrySet()) {
+                Pair<Integer, Integer> pointGap = entry.getValue();
+                if (between(gamePoints, pointGap.getLeft(), pointGap.getRight())) {
+                    return entry.getKey();
+                }
             }
         }
         return GameBadge.Newbie.name();
