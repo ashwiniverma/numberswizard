@@ -52,12 +52,13 @@ public class NumberWizardModel {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("user_id", user_id)
-                .append("saved_games", saved_games)
-                .append("nickname", nickname)
-                .append("profile_badge", profile_badge)
-                .append("profile_score", profile_score)
-                .toString();
+        final StringBuilder sb = new StringBuilder("NumberWizardModel{");
+        sb.append("user_id='").append(user_id).append('\'');
+        sb.append(", saved_games='").append(saved_games).append('\'');
+        sb.append(", nickname='").append(nickname).append('\'');
+        sb.append(", profile_badge='").append(profile_badge).append('\'');
+        sb.append(", profile_score=").append(profile_score);
+        sb.append('}');
+        return sb.toString();
     }
 }

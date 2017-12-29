@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -93,6 +94,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
             session.setAttribute(USER_DATA_SESSION_ATTRIBUTE, userDataList);
             String nickName = userDataList.get(0).getNickname();
             session.setAttribute(USER_NAME_SESSION_ATTRIBUTE,nickName);
+
             return getAskResponse(CARD_TITLE, String.format(GAME_RESUME_TEXT,nickName));
 
         } else {
@@ -192,14 +194,15 @@ public class NumberWizardBySpeechlet implements Speechlet {
             if ("resume".equalsIgnoreCase(userGameStatus)) {
 
 
-                List<NumberWizardModel> gameList = (List<NumberWizardModel>) session.getAttribute(USER_DATA_SESSION_ATTRIBUTE);
+                List<Object> gameList = (List<Object>) session.getAttribute(USER_DATA_SESSION_ATTRIBUTE);
                 int count = 0;
                 String gameNames = "";
                 logger.info("inside GAME_RESUME_INTENT with game list {} ", gameList);
-                for(NumberWizardModel model : gameList) {
+                for(Object model : gameList) {
+                    NumberWizardModel numWiz = (NumberWizardModel) model;
                     count++;
-                    String gameType = model.getSaved_games().split(".")[0];
-                    String gameLevel = model.getSaved_games().split(".")[1];
+                    String gameType = numWiz.getSaved_games().split(".")[0];
+                    String gameLevel = numWiz.getSaved_games().split(".")[1];
                     gameNames = gameNames + "," + String.format(GAME_MESSAGE_TEXT, String.valueOf(count), gameType, gameLevel);;
 
                 }
