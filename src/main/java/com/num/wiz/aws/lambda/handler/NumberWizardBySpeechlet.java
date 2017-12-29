@@ -140,7 +140,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
             session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName+PointsMapping.SEPARATOR+gameLevel);
             Integer points = PointsMapping.getPointGameMapping().get(gameName+PointsMapping.SEPARATOR+gameLevel);
 
-            String response = String.format(GAME_START_TEXT, gameName, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+            String response = String.format(GAME_START_TEXT, gameName, points,triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
 
             return getAskResponse(CARD_TITLE, response);
 
