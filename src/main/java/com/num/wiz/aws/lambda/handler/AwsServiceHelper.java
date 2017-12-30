@@ -18,7 +18,7 @@ import java.util.List;
 
 public class AwsServiceHelper {
 
-    private static final Logger log = LoggerFactory.getLogger(NumberWizardHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(AwsServiceHelper.class);
     private static final String RECOGNITION_TABLE = "GAME_RECORD_TABLE";
     private static DynamoDB dynamoDB;
     private static String imageUrl = "";
@@ -44,7 +44,6 @@ public class AwsServiceHelper {
             numberWizardModel.setSaved_games(item.getString("saved_games"));
             numberWizardModel.setUser_id(item.getString("user_id"));
             userDataList.add(numberWizardModel);
-            log.info("Found Records: {}" ,userDataList);
         }
         return userDataList;
     }

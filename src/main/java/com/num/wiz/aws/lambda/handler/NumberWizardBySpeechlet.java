@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class NumberWizardBySpeechlet implements Speechlet {
 
-    private static final Logger logger = LoggerFactory.getLogger(NumberWizardHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(NumberWizardBySpeechlet.class);
     private static final String CARD_TITLE = "Number Wizard";
 
     /** TEXT FOR THE INTENTS **/
@@ -42,7 +42,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
     private static final String GAME_RESULT_INTENT = "GameStarted";
     private static final String GAME_RESUME_INTENT = "Resume";
     private static final String SAVED_GAME_START_INTENT = "SavedGameStart";
-    public static final String GAME_SCORE_INTENT = "GetScoreIntent";
+    private static final String GAME_SCORE_INTENT = "GetScoreIntent";
 
 
     /** SLOT NAMES **/
@@ -79,14 +79,23 @@ public class NumberWizardBySpeechlet implements Speechlet {
         return getAskResponse(CARD_TITLE, speechText);
     }
 
+    private SpeechletResponse getHelpResponse( String speechText) {
+        return getAskResponse(CARD_TITLE, speechText);
+    }
+
     @Override public void onSessionStarted(SessionStartedRequest sessionStartedRequest, Session session)
             throws SpeechletException {
         logger.info("onSessionStarted requestId={}, sessionId={}",sessionStartedRequest.getRequestId(),session.getSessionId());
+        String usrId = session.getUser().getUserId();//getAttribute(USER_ID_SESSION_ATTRIBUTE);
+        List<NumberWizardModel> userDataList = AwsServiceHelper.getSavedGame(usrId);
+
+        session.setAttribute(USER_DATA_SESSION_ATTRIBUTE, userDataList);
+        String nickName = userDataList.get(0).getNickname();
+        session.setAttribute(USER_NAME_SESSION_ATTRIBUTE,nickName);
     }
 
     @Override public SpeechletResponse onLaunch(LaunchRequest launchRequest, Session session)
             throws SpeechletException {
-
         String usrId = session.getUser().getUserId();//getAttribute(USER_ID_SESSION_ATTRIBUTE);
         List<NumberWizardModel> userDataList = AwsServiceHelper.getSavedGame(usrId);
         if(userDataList.size() > 0) {
@@ -105,158 +114,171 @@ public class NumberWizardBySpeechlet implements Speechlet {
     @Override public SpeechletResponse onIntent(IntentRequest intentRequest, Session session)
             throws SpeechletException {
 
-        logger.info("onIntent requestId={}, sessionId={}", intentRequest.getRequestId(), session.getSessionId());
+        String userName = (String) session.getAttribute(USER_NAME_SESSION_ATTRIBUTE);
+        try {
+            logger.info("onIntent requestId={}, sessionId={}", intentRequest.getRequestId(), session.getSessionId());
 
-        Intent intent = intentRequest.getIntent();
-        String intentName = (intent != null) ? intent.getName() : null;
+            Intent intent = intentRequest.getIntent();
+            String intentName = (intent != null) ? intent.getName() : null;
 
-        if (NICK_NAME_INTENT.equals(intentName)) { // START of intent first time
-            String userName = intent.getSlot(NAME_INTENT_SLOT).getValue();
-            session.setAttribute(USER_NAME_SESSION_ATTRIBUTE,userName);
+            if (NICK_NAME_INTENT.equals(intentName)) { // START of intent first time
+                userName = intent.getSlot(NAME_INTENT_SLOT).getValue();
+                session.setAttribute(USER_NAME_SESSION_ATTRIBUTE, userName);
 
-            return getAskResponse(CARD_TITLE, String.format(GAME_PLAY_TEXT, userName));
+                return getAskResponse(CARD_TITLE, String.format(GAME_PLAY_TEXT, userName));
 
-        } else if (GAME_NAME_INTENT.equals(intentName)) { // Choose game type (+,-,*,/) intent
-            String gameName = intent.getSlot(GAME_NAME_INTENT_SLOT).getValue();
-            session.setAttribute(GAME_NAME_SESSION_ATTRIBUTE,gameName.toUpperCase());
-            logger.info("onIntent gameName={}",gameName);
+            } else if (GAME_NAME_INTENT.equals(intentName)) { // Choose game type (+,-,*,/) intent
+                String gameName = intent.getSlot(GAME_NAME_INTENT_SLOT).getValue();
+                session.setAttribute(GAME_NAME_SESSION_ATTRIBUTE, gameName.toUpperCase());
+                logger.info("onIntent gameName={}", gameName);
 
-            return getAskResponse(CARD_TITLE, GAME_LEVEL_TEXT);
+                return getAskResponse(CARD_TITLE, GAME_LEVEL_TEXT);
 
-        } else if (GAME_LEVEL_INTENT.equals(intentName)) { // Choose game level (high,medium,easy) intent
-            String gameLevel = intent.getSlot(GAME_LEVEL_INTENT_SLOT).getValue();
-            session.setAttribute(GAME_LEVEL_SESSION_ATTRIBUTE,gameLevel);
-            logger.info("onIntent gameLevel={}",gameLevel);
+            } else if (GAME_LEVEL_INTENT.equals(intentName)) { // Choose game level (high,medium,easy) intent
+                String gameLevel = intent.getSlot(GAME_LEVEL_INTENT_SLOT).getValue();
+                session.setAttribute(GAME_LEVEL_SESSION_ATTRIBUTE, gameLevel);
+                logger.info("onIntent gameLevel={}", gameLevel);
 
-            String gameName = (String)session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
-
-            if (null == gameName) {
-                gameName = GameType.ADDITION.name();
-                session.setAttribute(GAME_NAME_SESSION_ATTRIBUTE, gameName.toUpperCase() );
-            }
-
-            Triple triple = MathHelper.getTheGameForLevel(gameName, gameLevel);
-            session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getRight());
-            session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName+PointsMapping.SEPARATOR+gameLevel);
-            Integer points = PointsMapping.getPointGameMapping().get(gameName+PointsMapping.SEPARATOR+gameLevel);
-
-            String response = String.format(GAME_START_TEXT, gameName, points,triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
-
-            return getAskResponse(CARD_TITLE, response);
-
-        } else if (GAME_RESULT_INTENT.equals(intentName)) { // result section of the game
-            String userGameResultValue = intent.getSlot(GAME_LEVEL_RESULT_INTENT_SLOT).getValue();
-
-            String gameName = (String)session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
-            String gameLevel = (String)session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);
-            String response;
-            try {
-                int actualGameResult = (Integer)session.getAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE);
-                logger.info("onIntent {} gameName={}, gameLevel={}, actualGameResult={}",GAME_RESULT_INTENT, gameName, gameLevel, actualGameResult);
+                String gameName = (String) session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
 
                 if (null == gameName) {
                     gameName = GameType.ADDITION.name();
-                    session.setAttribute(GAME_NAME_SESSION_ATTRIBUTE, gameName);
-                }
-
-                if (null == gameLevel) {
-                    gameLevel = GameLevel.easy.name();
-                    session.setAttribute(GAME_LEVEL_SESSION_ATTRIBUTE,gameLevel);
+                    session.setAttribute(GAME_NAME_SESSION_ATTRIBUTE, gameName.toUpperCase());
                 }
 
                 Triple triple = MathHelper.getTheGameForLevel(gameName, gameLevel);
-                session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getRight());
+                session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE, triple.getRight());
+                session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName + PointsMapping.SEPARATOR + gameLevel);
+                Integer points = PointsMapping.getPointGameMapping().get(gameName + PointsMapping.SEPARATOR + gameLevel);
 
-                if (userGameResultValue.equals(String.valueOf(actualGameResult))) { // if answer is correct
+                String response = String.format(GAME_START_TEXT, gameName, points, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
 
-                    Integer gamePoint = (Integer) session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
-                    gamePoint = getWinningScore(gameName + PointsMapping.SEPARATOR + gameLevel, gamePoint);
-                    //INFO add and update the score
-                    session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
-                    session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName + PointsMapping.SEPARATOR + gameLevel);
+                return getAskResponse(CARD_TITLE, response);
 
-                    response = String.format(GAME_RESULT_CORRECT_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+            } else if (GAME_RESULT_INTENT.equals(intentName)) { // result section of the game
+                String userGameResultValue = intent.getSlot(GAME_LEVEL_RESULT_INTENT_SLOT).getValue();
 
-                } else {
-                    response = String.format(GAME_RESULT_WRONG_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+                String gameName = (String) session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
+                String gameLevel = (String) session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);
+                String response;
+                try {
+                    int actualGameResult = (Integer) session.getAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE);
+                    logger.info("onIntent {} gameName={}, gameLevel={}, actualGameResult={}", GAME_RESULT_INTENT, gameName, gameLevel, actualGameResult);
+
+                    if (null == gameName) {
+                        gameName = GameType.ADDITION.name();
+                        session.setAttribute(GAME_NAME_SESSION_ATTRIBUTE, gameName);
+                    }
+
+                    if (null == gameLevel) {
+                        gameLevel = GameLevel.easy.name();
+                        session.setAttribute(GAME_LEVEL_SESSION_ATTRIBUTE, gameLevel);
+                    }
+
+                    Triple triple = MathHelper.getTheGameForLevel(gameName, gameLevel);
+                    session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE, triple.getRight());
+
+                    if (userGameResultValue.equals(String.valueOf(actualGameResult))) { // if answer is correct
+
+                        Integer gamePoint = (Integer) session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
+                        gamePoint = getWinningScore(gameName + PointsMapping.SEPARATOR + gameLevel, gamePoint);
+                        //INFO add and update the score
+                        session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
+                        session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName + PointsMapping.SEPARATOR + gameLevel);
+
+                        response = String.format(GAME_RESULT_CORRECT_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+
+                    } else {
+                        response = String.format(GAME_RESULT_WRONG_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+                    }
+                } catch (NumberFormatException | ClassCastException e) {
+                    response = "Sorry !! I could not capture your response. Please try saying again.";
                 }
-            } catch (NumberFormatException | ClassCastException e) {
-                response = "Sorry !! I could not capture your response. Please try saying again.";
-            }
 
-            return getAskResponse(CARD_TITLE, response);
+                return getAskResponse(CARD_TITLE, response);
 
-        } else if (GAME_RESUME_INTENT.equals(intentName)) {
-            //When player wants to go to a new game or resume the old game
+            } else if (GAME_RESUME_INTENT.equals(intentName)) {
+                //When player wants to go to a new game or resume the old game
+                logger.info("Inside GAME_RESUME_INTENT with Intent name {}", intentName);
 
-            String userGameStatus = intent.getSlot(GAME_STATUS_INTENT_SLOT).getValue();
-            String userNickName = (String)session.getAttribute(USER_NAME_SESSION_ATTRIBUTE);
-            if ("resume".equalsIgnoreCase(userGameStatus)) {
+                String userGameStatus = intent.getSlot(GAME_STATUS_INTENT_SLOT).getValue();
+                String userNickName = (String) session.getAttribute(USER_NAME_SESSION_ATTRIBUTE);
+                if ("resume".equalsIgnoreCase(userGameStatus) || "saved".equalsIgnoreCase(userGameStatus)) {
 
+                    logger.info("Inside GAME_RESUME_INTENT Resume Game");
+                    List<Object> gameList = (List<Object>) session.getAttribute(USER_DATA_SESSION_ATTRIBUTE);
+                    int count = 0;
+                    String gameNames = "";
+                    logger.info("inside GAME_RESUME_INTENT with game list {} ", gameList);
+                    for (Object model : gameList) {
+                        NumberWizardModel numWiz = (NumberWizardModel) model;
+                        count++;
+                        String gameType = numWiz.getSaved_games().split(".")[0];
+                        String gameLevel = numWiz.getSaved_games().split(".")[1];
+                        gameNames = gameNames + "," + String.format(GAME_MESSAGE_TEXT, String.valueOf(count), gameType, gameLevel);
 
-                List<Object> gameList = (List<Object>) session.getAttribute(USER_DATA_SESSION_ATTRIBUTE);
-                int count = 0;
-                String gameNames = "";
-                logger.info("inside GAME_RESUME_INTENT with game list {} ", gameList);
-                for(Object model : gameList) {
-                    NumberWizardModel numWiz = (NumberWizardModel) model;
-                    count++;
-                    String gameType = numWiz.getSaved_games().split(".")[0];
-                    String gameLevel = numWiz.getSaved_games().split(".")[1];
-                    gameNames = gameNames + "," + String.format(GAME_MESSAGE_TEXT, String.valueOf(count), gameType, gameLevel);;
+                    }
+                    return getAskResponse(CARD_TITLE, gameNames + SAVED_GAME_START_TEXT);
 
+                } else {//show the intent to start the new game
+                    logger.info("Inside GAME_RESUME_INTENT New Game");
+                    return getAskResponse(CARD_TITLE, String.format(GAME_PLAY_TEXT, userNickName));
                 }
-                return getAskResponse(CARD_TITLE, gameNames + SAVED_GAME_START_TEXT);
 
-            } else {//show the intent to start the new game
-                return getAskResponse(CARD_TITLE, String.format(GAME_PLAY_TEXT, userNickName));
+            } else if (SAVED_GAME_START_INTENT.equals(intentName)) {
+                //INFO take the game name and level, and begin the saved game
+                String savedGameName = intent.getSlot(GAME_NAME_INTENT_SLOT).getValue();
+                String savedGameLevel = intent.getSlot(GAME_LEVEL_INTENT_SLOT).getValue();
+
+                Triple triple = MathHelper.getTheGameForLevel(savedGameName, savedGameLevel);
+                session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE, triple.getRight());
+
+                String response = String.format(GAME_START_TEXT, savedGameName, triple.getLeft(), getGameJarganMap().get(savedGameName.toUpperCase()), triple.getMiddle());
+
+                return getAskResponse(CARD_TITLE, response);
+
+
+            } else if (GAME_SCORE_INTENT.equals(intentName)) {
+                Integer gamePoint = (Integer) session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
+                String gameName = (String) session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
+                String gameLevel = (String) session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);
+                ;
+                String badge = PointsMapping.getBadge(gamePoint);
+                logger.info("GAME_SCORE_INTENT Points={} , gameName={} , gameLevel={} and badge={} ", gamePoint, gameName, gameLevel, badge);
+
+                Triple triple = MathHelper.getTheGameForLevel(gameName, gameLevel);
+                session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE, triple.getRight());
+                String continueGame = String.format(CONTINUE_GAME_TEXT, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+                String score = String.format(GAME_SCORE_TEXT, gameName, gameLevel, gamePoint, badge);
+
+                return getAskResponse(CARD_TITLE, score + continueGame);
+
+            } else if ("AMAZON.HelpIntent".equals(intentName) || "AMAZON.NoIntent".equals(intentName)) {
+                return getWelcomeResponse();
+
+            } else if ("AMAZON.StopIntent".equals(intentName) || "AMAZON.CancelIntent".equals(intentName)) {
+                Integer totalScore = (Integer) session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
+                String badge = PointsMapping.getBadge(totalScore);
+                String goodByeMessage = String.format("Good Bye, your total score is {} . And you have earned a {} badge.", totalScore, badge);
+                logger.info("Good Bye Message {}", goodByeMessage);
+                saveRecordToDb(session);
+
+                SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
+                outputSpeech.setSsml("<speak>" + goodByeMessage + "</speak>");
+                return SpeechletResponse.newTellResponse(outputSpeech);
+
+            } else {
+                return getWelcomeResponse();
             }
+        } catch (Exception e) {
+            logger.error("There was an exception while processing the Intent {}", e.fillInStackTrace());
 
-        } else if (SAVED_GAME_START_INTENT.equals(intentName)) {
-            //INFO take the game name and level, and begin the saved game
-            String savedGameName = intent.getSlot(GAME_NAME_INTENT_SLOT).getValue();
-            String savedGameLevel = intent.getSlot(GAME_LEVEL_INTENT_SLOT).getValue();
-
-            Triple triple = MathHelper.getTheGameForLevel(savedGameName, savedGameLevel);
-            session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getRight());
-
-            String response = String.format(GAME_START_TEXT, savedGameName, triple.getLeft(), getGameJarganMap().get(savedGameName.toUpperCase()), triple.getMiddle());
-
-            return getAskResponse(CARD_TITLE, response);
-
-
-        } else if (GAME_SCORE_INTENT.equals(intentName)) {
-            Integer gamePoint = (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
-            String gameName = (String)session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
-            String gameLevel = (String)session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);;
-            String badge = PointsMapping.getBadge(gamePoint);
-            logger.info("GAME_SCORE_INTENT Points={} , gameName={} , gameLevel={} and badge={} ",gamePoint,gameName,gameLevel,badge);
-
-            Triple triple = MathHelper.getTheGameForLevel(gameName, gameLevel);
-            session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE,triple.getRight());
-            String continueGame = String.format(CONTINUE_GAME_TEXT , triple.getLeft() ,getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
-            String score = String.format(GAME_SCORE_TEXT, gameName, gameLevel, gamePoint, badge);
-
-            return getAskResponse(CARD_TITLE, score+continueGame);
-
-        } else if ("AMAZON.HelpIntent".equals(intentName) || "AMAZON.NoIntent".equals(intentName)) {
-            return getWelcomeResponse();
-
-        } else if ("AMAZON.StopIntent".equals(intentName) || "AMAZON.CancelIntent".equals(intentName)) {
-            Integer totalScore = (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
-            String badge = PointsMapping.getBadge(totalScore);
-            String goodByeMessage = String.format("Good Bye, your total score is {} . And you have earned a {} badge.", totalScore, badge);
-            logger.info("Good Bye Message {}", goodByeMessage);
-            saveRecordToDb(session);
-
-            SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
-            outputSpeech.setSsml("<speak>" + goodByeMessage + "</speak>");
-            return SpeechletResponse.newTellResponse(outputSpeech);
-
-        } else {
-            return getWelcomeResponse();
+            if (StringUtils.isNotBlank(userName)) {
+                return getAskResponse(CARD_TITLE, "Sorry! There was a problem. Restarting the game again!!" + String.format(GAME_PLAY_TEXT, userName));
+            } else {
+                return getHelpResponse("Sorry! There was a problem. Restarting the game again!!. Please let me know your nickname.");
+            }
         }
-
     }
 
     private int getWinningScore(String gameNameAndLevel, Integer currentScore) {
@@ -284,17 +306,19 @@ public class NumberWizardBySpeechlet implements Speechlet {
         //INFO get the score and the update the db, also calculate the badge
         String currentGame = (String) session.getAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE);
         String userId = session.getUser().getUserId();
-        Integer totalScore = (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
+        Integer totalScore = (Integer) session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
         String nickName = (String) session.getAttribute(USER_NAME_SESSION_ATTRIBUTE);
 
-        NumberWizardModel numberWizardModel = new NumberWizardModel();
-        numberWizardModel.setUser_id(userId);
-        numberWizardModel.setSaved_games(currentGame);
-        numberWizardModel.setNickname(nickName);
-        numberWizardModel.setProfile_score((null == totalScore) ? 0 : totalScore);
-        numberWizardModel.setProfile_badge(PointsMapping.getBadge(totalScore));
-        AwsServiceHelper.updateDataIntoDb(numberWizardModel);
-        logger.info("Saved Record to db", numberWizardModel, session.getSessionId());
+        if (StringUtils.isNotBlank(currentGame) && StringUtils.isNotBlank(userId) && StringUtils.isNotBlank(nickName)) {
+            NumberWizardModel numberWizardModel = new NumberWizardModel();
+            numberWizardModel.setUser_id(userId);
+            numberWizardModel.setSaved_games(currentGame);
+            numberWizardModel.setNickname(nickName);
+            numberWizardModel.setProfile_score((null == totalScore) ? 0 : totalScore);
+            numberWizardModel.setProfile_badge(PointsMapping.getBadge(totalScore));
+            AwsServiceHelper.updateDataIntoDb(numberWizardModel);
+            logger.info("Saved Record to db", numberWizardModel, session.getSessionId());
+        }
     }
 
     private SpeechletResponse getAskResponse(String cardTitle, String speechText) {

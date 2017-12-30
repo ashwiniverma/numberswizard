@@ -15,4 +15,5 @@ SlotType: GAME_STATUS_LIST
 SlotValues:
             resume
             new
+            saved
 
