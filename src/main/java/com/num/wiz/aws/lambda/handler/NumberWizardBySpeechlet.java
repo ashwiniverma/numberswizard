@@ -156,14 +156,17 @@ public class NumberWizardBySpeechlet implements Speechlet {
 
             } else if (GAME_RESULT_INTENT.equals(intentName)) { // result section of the game
                 String response;
+                int gamePoint =0;
                 try {
                     String userGameResultValue = intent.getSlot(GAME_LEVEL_RESULT_INTENT_SLOT).getValue();
 
                     String gameName = (String) session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
                     String gameLevel = (String) session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);
                     List<Object> userDataList = (List<Object>)session.getAttribute(USER_DATA_SESSION_ATTRIBUTE);
-                    int gamePoint = getTheCurrentGameScore(userDataList, gameName+"."+gameLevel);
-                    session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
+                    if(userDataList.size() > 0 ) {
+                        gamePoint = getTheCurrentGameScore(userDataList, gameName + "." + gameLevel);
+                        session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
+                    }
 
                     int actualGameResult = (Integer) session.getAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE);
                     logger.info("onIntent {} gameName={}, gameLevel={}, actualGameResult={}", GAME_RESULT_INTENT, gameName, gameLevel, actualGameResult);
@@ -187,7 +190,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
                         gamePoint = getWinningScore(gameName.toUpperCase() + PointsMapping.SEPARATOR + gameLevel, gamePoint);
                         //INFO add and update the score
                         session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
-                        session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName + PointsMapping.SEPARATOR + gameLevel);
+                        session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName.toUpperCase() + PointsMapping.SEPARATOR + gameLevel);
 
                         saveRecordToDb(session);
                         response = String.format(GAME_RESULT_CORRECT_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
