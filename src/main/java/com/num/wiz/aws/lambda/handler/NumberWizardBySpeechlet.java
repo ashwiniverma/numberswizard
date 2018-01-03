@@ -218,6 +218,14 @@ public class NumberWizardBySpeechlet implements Speechlet {
                     int count = 0;
                     String gameNames = "";
 
+                    if(gameList.size() ==1) {//if only one game is saved
+                        Map numWiz = (HashMap) gameList.get(0);
+                        String [] savedGamesArray = ((String) numWiz.get("saved_games")).split("\\.");
+                        String gameType = savedGamesArray[0];
+                        String gameLevel = savedGamesArray[1];
+                        return getAskResponse(CARD_TITLE, startTheExistingGame(gameType, gameLevel, session, GAME_START_TEXT));
+                    }
+
                     for (Object model : gameList) {
                         Map numWiz = (HashMap) model;
                         count++;
