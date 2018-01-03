@@ -21,9 +21,12 @@ GameStarted {GameResult}
 GameStarted correct value is {GameResult}
 Resume I want to {GameResume} game
 Resume I want to start a {GameResume} game
-Resume I want to start a {GameResume}
+Resume start a {GameResume} game
 Resume I want {GameResume}
+Resume I want to {GameResume} a previous game
+Resume I want to {GameResume} previous game
 Resume {GameResume}
 SavedGameStart begin with {GameNames} and level {GameLevel}
 SavedGameStart resume {GameNames} and level {GameLevel}
 SavedGameStart {GameNames} with level {GameLevel}
+SavedGameStart {GameNames} {GameLevel}

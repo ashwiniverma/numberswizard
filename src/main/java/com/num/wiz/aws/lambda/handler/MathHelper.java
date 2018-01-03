@@ -110,16 +110,19 @@ public class MathHelper {
             case "easy" :
                 leftValue = getSingleDigitNumber();
                 rightValue = getSingleDigitNumber();
+                rightValue = (0 == rightValue) ? 1: rightValue;
                 result = leftValue / rightValue;
                 break;
             case "medium" :
                 leftValue = getDoubleDigitNumber();
                 rightValue = getDoubleDigitNumber();
+                rightValue = (0 == rightValue) ? 1: rightValue;
                 result = leftValue / rightValue;
                 break;
             case "hard" :
                 leftValue = getTripleDigitNumber();
                 rightValue = getTripleDigitNumber();
+                rightValue = (0 == rightValue) ? 1: rightValue;
                 result = leftValue / rightValue;
                 break;
         }
