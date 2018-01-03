@@ -163,7 +163,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
                     String gameName = (String) session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
                     String gameLevel = (String) session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);
                     List<Object> userDataList = (List<Object>)session.getAttribute(USER_DATA_SESSION_ATTRIBUTE);
-                    if(userDataList.size() > 0 ) {
+                    if(null != userDataList && userDataList.size() > 0 ) {
                         gamePoint = getTheCurrentGameScore(userDataList, gameName + "." + gameLevel);
                         session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
                     }
@@ -185,8 +185,10 @@ public class NumberWizardBySpeechlet implements Speechlet {
                     session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE, triple.getRight());
 
                     if (userGameResultValue.equals(String.valueOf(actualGameResult))) { // if answer is correct
-
-                        gamePoint = gamePoint + (Integer) session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
+                        if (null != session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE))
+                        {
+                            gamePoint = gamePoint + (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE) ;
+                        }
                         gamePoint = getWinningScore(gameName.toUpperCase() + PointsMapping.SEPARATOR + gameLevel, gamePoint);
                         //INFO add and update the score
                         session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
