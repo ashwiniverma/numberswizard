@@ -283,7 +283,12 @@ public class NumberWizardBySpeechlet implements Speechlet {
 
             } else {
                 logger.info("Inside intentName={}", "Others");
-                return getWelcomeResponse();
+                String currentGameName = (String) session.getAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE);
+                if(StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(currentGameName)) {
+                    return getAskResponse(CARD_TITLE, "Sorry !! I could not capture your response. Please try saying again.");
+                } else {
+                    return getWelcomeResponse();
+                }
             }
         } catch (Exception e) {
             logger.error("There was an exception while processing the Intent {}", e.getStackTrace());
