@@ -187,9 +187,9 @@ public class NumberWizardBySpeechlet implements Speechlet {
                     if (userGameResultValue.equals(String.valueOf(actualGameResult))) { // if answer is correct
                         if (null != session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE))
                         {
-                            gamePoint = gamePoint + (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE) ;
+                            gamePoint = (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE) ;
                         }
-                        gamePoint = getWinningScore(gameName.toUpperCase() + PointsMapping.SEPARATOR + gameLevel, gamePoint);
+                        gamePoint = gamePoint + getWinningScore(gameName.toUpperCase() + PointsMapping.SEPARATOR + gameLevel, gamePoint);
                         //INFO add and update the score
                         session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
                         session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName.toUpperCase() + PointsMapping.SEPARATOR + gameLevel);
