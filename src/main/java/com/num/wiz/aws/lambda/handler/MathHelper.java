@@ -136,12 +136,12 @@ public class MathHelper {
     }
 
     public static int getDoubleDigitNumber() {
-        int rand = ThreadLocalRandom.current().nextInt(10,99);
+        int rand = ThreadLocalRandom.current().nextInt(10,50);
         return rand;
     }
 
     public static int getTripleDigitNumber() {
-        int rand = ThreadLocalRandom.current().nextInt(100,999);
+        int rand = ThreadLocalRandom.current().nextInt(51,100);
         return rand;
     }
 }

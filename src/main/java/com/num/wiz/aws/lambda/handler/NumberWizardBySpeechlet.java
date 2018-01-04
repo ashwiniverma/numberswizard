@@ -21,7 +21,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
 
     /** TEXT FOR THE INTENTS **/
     private static final String GAME_PLAY_TEXT = "Hello %s , let me know which game you want to play? Addition, Subtraction, Multiplication or Division? Please choose one of these.";
-    private static final String GAME_LEVEL_TEXT = "Great, Please tell me which difficulty level you want? Please choose one from easy, medium and hard by saying I want difficulty level and then the difficulty level.";
+    private static final String GAME_LEVEL_TEXT = "Great, Please tell me which difficulty level you want? Please choose one from easy, medium and hard.";
     private static final String GAME_START_TEXT = "Sounds Good, In this level you will be challenged to answer %s of numbers. You will be scoring %s points for each correct answers. Let's start, what is the result when %s %s %s";
     private static final String GAME_RESTART_TEXT = "Restarting game of %s , with current points %s .What is the result when %s %s %s";
     private static final String CONTINUE_GAME_TEXT = "Alright!! next question, what is the result when %s %s %s";
@@ -77,11 +77,11 @@ public class NumberWizardBySpeechlet implements Speechlet {
         String speechText = "Welcome to Number Wizard!! The skill that challenges yours Numbering skill on four areas, Addition, Subtraction, Multiplication and Division ." +
                 "You will be scoring points for each correct answer and 0 points for a wrong answer. Based on your points you will be ranked and also achieve the badges starting from Newbie," +
                 "Novice,Graduate,Expert,Master and Guru.  But first, I would like to get to know you better. Tell me your nickname by saying, My nickname is, and then your nickname.";
-        return getAskResponse(CARD_TITLE, speechText);
+        return getAskResponse(CARD_TITLE, speechText, null);
     }
 
     private SpeechletResponse getHelpResponse( String speechText) {
-        return getAskResponse(CARD_TITLE, speechText);
+        return getAskResponse(CARD_TITLE, speechText, null);
     }
 
     @Override public void onSessionStarted(SessionStartedRequest sessionStartedRequest, Session session)
@@ -107,7 +107,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
             String nickName = userDataList.get(0).getNickname();
             session.setAttribute(USER_NAME_SESSION_ATTRIBUTE,nickName);
 
-            return getAskResponse(CARD_TITLE, String.format(GAME_RESUME_TEXT,nickName));
+            return getAskResponse(CARD_TITLE, String.format(GAME_RESUME_TEXT,nickName), null);
 
         } else {
             return getWelcomeResponse();
@@ -129,22 +129,22 @@ public class NumberWizardBySpeechlet implements Speechlet {
                 userName = (StringUtils.isNotBlank(userName)? userName : intent.getSlot(NAME_INTENT_SLOT).getValue());
                 session.setAttribute(USER_NAME_SESSION_ATTRIBUTE, userName);
 
-                return getAskResponse(CARD_TITLE, String.format(GAME_PLAY_TEXT, userName));
+                return getAskResponse(CARD_TITLE, String.format(GAME_PLAY_TEXT, userName), null);
 
             } else if (GAME_NAME_INTENT.equals(intentName)) { // Choose game type (+,-,*,/) intent
                 String gameName = intent.getSlot(GAME_NAME_INTENT_SLOT).getValue();
                 session.setAttribute(GAME_NAME_SESSION_ATTRIBUTE, gameName.toUpperCase());
                 logger.info("onIntent gameName={}", gameName);
 
-                return getAskResponse(CARD_TITLE, GAME_LEVEL_TEXT);
+                return getAskResponse(CARD_TITLE, GAME_LEVEL_TEXT, null);
 
             } else if (GAME_LEVEL_INTENT.equals(intentName)) { // Choose game level (high,medium,easy) intent
                 String gameLevel = intent.getSlot(GAME_LEVEL_INTENT_SLOT).getValue();
 
-                return getAskResponse(CARD_TITLE, gameResponseIntent(session, gameLevel));
+                return getAskResponse(CARD_TITLE, gameResponseIntent(session, gameLevel), null);
 
             } else if (GAME_RESULT_INTENT.equals(intentName)) { // result section of the game
-                String response;
+                String response, reprompt = null;
                 int gamePoint =0;
                 session.setAttribute(GAME_STATE_SESSION_ATTRIBUTE, GameSate.RESULT.name());
                 try {
@@ -186,15 +186,17 @@ public class NumberWizardBySpeechlet implements Speechlet {
 
                         saveRecordToDb(session);
                         response = String.format(GAME_RESULT_CORRECT_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+                        reprompt = String.format(CONTINUE_GAME_TEXT,triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
 
                     } else {
                         response = String.format(GAME_RESULT_WRONG_TEXT + CONTINUE_GAME_TEXT, actualGameResult, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+                        reprompt = String.format(CONTINUE_GAME_TEXT, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
                     }
                 } catch (NumberFormatException | ClassCastException e) {
                     response = REPEAT_RESPONSE_TEXT;
                 }
 
-                return getAskResponse(CARD_TITLE, response);
+                return getAskResponse(CARD_TITLE, response, reprompt);
 
             } else if (GAME_RESUME_INTENT.equals(intentName)) {
                 //When player wants to go to a new game or resume the old game
@@ -213,7 +215,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
                         String [] savedGamesArray = ((String) numWiz.get("saved_games")).split("\\.");
                         String gameType = savedGamesArray[0];
                         String gameLevel = savedGamesArray[1];
-                        return getAskResponse(CARD_TITLE, startTheExistingGame(gameType, gameLevel, session, GAME_START_TEXT));
+                        return getAskResponse(CARD_TITLE, startTheExistingGame(gameType, gameLevel, session, GAME_START_TEXT), null);
                     }
 
                     for (Object model : gameList) {
@@ -225,11 +227,11 @@ public class NumberWizardBySpeechlet implements Speechlet {
                         gameNames = gameNames + "," + String.format(GAME_MESSAGE_TEXT, String.valueOf(count), gameType, gameLevel);
 
                     }
-                    return getAskResponse(CARD_TITLE, gameNames + SAVED_GAME_START_TEXT);
+                    return getAskResponse(CARD_TITLE, gameNames + SAVED_GAME_START_TEXT, null);
 
                 } else {//show the intent to start the new game
                     logger.info("Inside GAME_RESUME_INTENT New Game");
-                    return getAskResponse(CARD_TITLE, String.format(GAME_PLAY_TEXT, userNickName));
+                    return getAskResponse(CARD_TITLE, String.format(GAME_PLAY_TEXT, userNickName), null);
                 }
 
             } else if (SAVED_GAME_START_INTENT.equals(intentName)) {
@@ -237,7 +239,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
                 String savedGameName = intent.getSlot(GAME_NAME_INTENT_SLOT).getValue();
                 String savedGameLevel = intent.getSlot(GAME_LEVEL_INTENT_SLOT).getValue();
 
-                return getAskResponse(CARD_TITLE, startTheExistingGame(savedGameName, savedGameLevel, session, GAME_START_TEXT));
+                return getAskResponse(CARD_TITLE, startTheExistingGame(savedGameName, savedGameLevel, session, GAME_START_TEXT), null);
 
             } else if (GAME_SCORE_INTENT.equals(intentName)) {
                 Integer gamePoint = (Integer) session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
@@ -252,7 +254,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
                 String continueGame = String.format(CONTINUE_GAME_TEXT, triple.getLeft(), getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
                 String score = String.format(GAME_SCORE_TEXT, gameName, gameLevel, gamePoint, badge);
 
-                return getAskResponse(CARD_TITLE, score + continueGame);
+                return getAskResponse(CARD_TITLE, score + continueGame, null);
 
             } else if ("AMAZON.HelpIntent".equals(intentName) || "AMAZON.NoIntent".equals(intentName)) {
                 return getWelcomeResponse();
@@ -276,11 +278,11 @@ public class NumberWizardBySpeechlet implements Speechlet {
                 String currentGameName = (String) session.getAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE);
                 String gameLevel = (String) session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);
                 if(StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(currentGameName) && null == gameState) {
-                    return getAskResponse(CARD_TITLE, REPEAT_RESPONSE_TEXT);
+                    return getAskResponse(CARD_TITLE, REPEAT_RESPONSE_TEXT, null);
                 } else if (null != gameState && gameState.equalsIgnoreCase(GameSate.RESULT.name())) {
-                    return getAskResponse(CARD_TITLE, REPEAT_RESPONSE_TEXT);
+                    return getAskResponse(CARD_TITLE, REPEAT_RESPONSE_TEXT, null);
                 } else if (null != gameState && gameState.equalsIgnoreCase(GameSate.INPROGRESS.name())) {
-                    return getAskResponse(CARD_TITLE, gameResponseIntent(session, gameLevel));
+                    return getAskResponse(CARD_TITLE, gameResponseIntent(session, gameLevel), null);
                 } else {
                     return getWelcomeResponse();
                 }
@@ -291,7 +293,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
             String gameLevel = (String) session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);
 
             if (StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(gameName) && StringUtils.isNotBlank(gameLevel)) {
-                return getAskResponse(CARD_TITLE, "Sorry! There was a problem. " + startTheExistingGame(gameName, gameLevel, session, GAME_RESTART_TEXT));
+                return getAskResponse(CARD_TITLE, "Sorry! There was a problem. " + startTheExistingGame(gameName, gameLevel, session, GAME_RESTART_TEXT), null);
             } else {
                 return getHelpResponse("Sorry! There was a problem. Restarting the game again!!. Please let me know your nickname.");
             }
@@ -385,7 +387,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
         }
     }
 
-    private SpeechletResponse getAskResponse(String cardTitle, String speechText) {
+    private SpeechletResponse getAskResponse(String cardTitle, String speechText, String repromptString) {
         StandardCard standardCard = new StandardCard();
 
         if (StringUtils.isNotBlank(AwsServiceHelper.getImageUrl())) {
@@ -405,7 +407,15 @@ public class NumberWizardBySpeechlet implements Speechlet {
         SsmlOutputSpeech outputSpeech = new SsmlOutputSpeech();
         outputSpeech.setSsml("<speak>" + speechText + "</speak>");
 
-        Reprompt reprompt = getReprompt(outputSpeech);
+        SsmlOutputSpeech repromptOutputSpeech = new SsmlOutputSpeech();
+
+        if (StringUtils.isNotBlank(repromptString)) {
+            repromptOutputSpeech.setSsml("<speak>" + repromptString + "</speak>");
+        } else {
+            repromptOutputSpeech.setSsml("<speak>" + outputSpeech + "</speak>");
+        }
+
+        Reprompt reprompt = getReprompt(repromptOutputSpeech);
 
         return SpeechletResponse.newAskResponse(outputSpeech, reprompt,standardCard);
     }
