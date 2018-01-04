@@ -412,7 +412,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
         if (StringUtils.isNotBlank(repromptString)) {
             repromptOutputSpeech.setSsml("<speak>" + repromptString + "</speak>");
         } else {
-            repromptOutputSpeech.setSsml("<speak>" + outputSpeech + "</speak>");
+            repromptOutputSpeech.setSsml("<speak>" + speechText + "</speak>");
         }
 
         Reprompt reprompt = getReprompt(repromptOutputSpeech);
