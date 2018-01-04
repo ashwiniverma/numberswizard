@@ -24,15 +24,15 @@ public class NumberWizardBySpeechlet implements Speechlet {
     private static final String GAME_LEVEL_TEXT = "Great, Please tell me which difficulty level you want? Please choose one from easy, medium and hard.";
     private static final String GAME_START_TEXT = "Sounds Good, In this level you will be challenged to answer %s of numbers. You will be scoring %s points for each correct answers. Let's start, what is the result when %s %s %s";
     private static final String GAME_RESTART_TEXT = "Restarting game of %s , with current points %s .What is the result when %s %s %s";
-    private static final String CONTINUE_GAME_TEXT = "Alright!! next question, what is the result when %s %s %s";
-    private static final String GAME_RESULT_CORRECT_TEXT = "You are right, the result is %s .";
+    private static final String CONTINUE_GAME_TEXT = "Next question, what is the result when %s %s %s";
+    private static final String GAME_RESULT_CORRECT_TEXT = "You are right, the result is %s . Alright!! ";
     private static final String GAME_RESUME_TEXT = "Welcome Back %s , to Number Wizard! Please say New game to start a new game or say resume to continue playing the previous game.";
     private static final String GAME_MESSAGE_TEXT = "Game %s . %s with difficulty level %s .";
     private static final String SAVED_GAME_START_TEXT = " Please say which game you want to resume? You can start the saved games by saying, game name and then the level . Like, Addition with level Easy .";
     private static final String GAME_SCORE_TEXT = "Your current score for %s , level %s is %s . You have earned %s badge .";
     private static final String GAME_EXIT_MESSAGE = "Good Bye, your total score is %s . And you have earned a %s badge.";
 
-    private static final String GAME_RESULT_WRONG_TEXT = "Sorry it's the wrong answer. The correct answer is %s .";
+    private static final String GAME_RESULT_WRONG_TEXT = "Sorry it's the wrong answer. The correct answer is %s . Alright!!";
     private static final Map<String, String> GAME_JARGAN_MAP = new HashMap(4);
 
     /** INTENT NAMES **/
@@ -125,7 +125,11 @@ public class NumberWizardBySpeechlet implements Speechlet {
 
             String gameState = (String)session.getAttribute(GAME_STATE_SESSION_ATTRIBUTE);
 
-            if (NICK_NAME_INTENT.equals(intentName)) { // START of intent first time
+            if (null != gameState && gameState.equalsIgnoreCase(GameSate.RESULT.name()) && !GAME_RESULT_INTENT.equalsIgnoreCase(intentName)) {
+                intentName = GAME_RESULT_INTENT;
+            }
+
+                if (NICK_NAME_INTENT.equals(intentName)) { // START of intent first time
                 userName = (StringUtils.isNotBlank(userName)? userName : intent.getSlot(NAME_INTENT_SLOT).getValue());
                 session.setAttribute(USER_NAME_SESSION_ATTRIBUTE, userName);
 
