@@ -17,7 +17,7 @@ import java.util.Map;
 public class NumberWizardBySpeechlet implements Speechlet {
 
     private static final Logger logger = LoggerFactory.getLogger(NumberWizardBySpeechlet.class);
-    private static final String CARD_TITLE = "Number Wizard";
+    private static final String CARD_TITLE = "Numbers Wizard";
 
     /** TEXT FOR THE INTENTS **/
     private static final String GAME_PLAY_TEXT = "Hello %s , let me know which game you want to play? Addition, Subtraction, Multiplication or Division? Please choose one of these.";
@@ -74,7 +74,7 @@ public class NumberWizardBySpeechlet implements Speechlet {
     }
 
     private SpeechletResponse getWelcomeResponse() {
-        String speechText = "Welcome to Number Wizard!! The skill that challenges yours Numbering skill on four areas, Addition, Subtraction, Multiplication and Division ." +
+        String speechText = "Welcome to Numbers Wizard!! The skill that challenges yours Numbering skill on four areas, Addition, Subtraction, Multiplication and Division ." +
                 "You will be scoring points for each correct answer and 0 points for a wrong answer. Based on your points you will be ranked and also achieve the badges starting from Newbie," +
                 "Novice,Graduate,Expert,Master and Guru.  But first, I would like to get to know you better. Tell me your nickname by saying, My nickname is, and then your nickname.";
         return getAskResponse(CARD_TITLE, speechText, null);
