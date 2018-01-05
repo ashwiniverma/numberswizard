@@ -157,8 +157,8 @@ public class NumberWizardBySpeechlet implements Speechlet {
                     String gameName = (String) session.getAttribute(GAME_NAME_SESSION_ATTRIBUTE);
                     String gameLevel = (String) session.getAttribute(GAME_LEVEL_SESSION_ATTRIBUTE);
                     List<Object> userDataList = (List<Object>)session.getAttribute(USER_DATA_SESSION_ATTRIBUTE);
-                    if(null != userDataList && userDataList.size() > 0 ) {
-                        gamePoint = getTheCurrentGameScore(userDataList, gameName + "." + gameLevel);
+                    if(null != userDataList && userDataList.size() > 0 && null == session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE)) {
+                        gamePoint = getTheCurrentGameScore(userDataList, gameName.toUpperCase() + PointsMapping.SEPARATOR + gameLevel);
                         session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
                     }
 
@@ -179,11 +179,10 @@ public class NumberWizardBySpeechlet implements Speechlet {
                     session.setAttribute(GAME_TYPE_RESULT_SESSION_ATTRIBUTE, triple.getRight());
 
                     if (String.valueOf(actualGameResult).equals(userGameResultValue)) { // if answer is correct
-                        if (null != session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE))
-                        {
-                            gamePoint = (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE) ;
+                        if (null != session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE)) {
+                            gamePoint = (Integer)session.getAttribute(GAME_POINTS_SESSION_ATTRIBUTE);
                         }
-                        gamePoint = gamePoint + getWinningScore(gameName.toUpperCase() + PointsMapping.SEPARATOR + gameLevel, gamePoint);
+                        gamePoint = getWinningScore(gameName.toUpperCase() + PointsMapping.SEPARATOR + gameLevel, gamePoint);
                         //INFO add and update the score
                         session.setAttribute(GAME_POINTS_SESSION_ATTRIBUTE, gamePoint);
                         session.setAttribute(CURRENT_GAME_NAME_SESSION_ATTRIBUTE, gameName.toUpperCase() + PointsMapping.SEPARATOR + gameLevel);
