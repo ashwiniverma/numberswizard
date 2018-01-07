@@ -1,21 +1,27 @@
-package com.num.wiz.aws.lambda.handler;
+package com.num.wiz.aws.lambda.service;
 
+import com.num.wiz.aws.lambda.service.enums.GameBadge;
+import com.num.wiz.aws.lambda.service.enums.GameLevel;
+import com.num.wiz.aws.lambda.service.enums.GameType;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class PointsMapping {
+public class PointsMappingService {
 
+    private static final Logger logger = LoggerFactory.getLogger(PointsMappingService.class);
     private static Map<String, Integer> pointsForGameMapping;
     private static Map<String, Pair<Integer,Integer>> pointsForBadgeMapping;
-    protected static final String SEPARATOR = ".";
+    public static final String SEPARATOR = ".";
 
-    protected static Map<String, Integer> getPointGameMapping() {
+    public static Map<String, Integer> getPointGameMapping() {
         if(null == pointsForGameMapping){
             pointsForGameMapping = new HashMap<>();
-            pointsForGameMapping.put(GameType.ADDITION.name()+SEPARATOR+GameLevel.easy.name(),3);
+            pointsForGameMapping.put(GameType.ADDITION.name()+SEPARATOR+ GameLevel.easy.name(),3);
             pointsForGameMapping.put(GameType.SUBTRACTION.name()+SEPARATOR+GameLevel.easy.name(),3);
             pointsForGameMapping.put(GameType.MULTIPLICATION.name()+SEPARATOR+GameLevel.easy.name(),3);
             pointsForGameMapping.put(GameType.DIVISION.name()+SEPARATOR+GameLevel.easy.name(),3);
@@ -46,7 +52,7 @@ public class PointsMapping {
         return pointsForBadgeMapping;
     }
 
-    protected static String getBadge(Integer gamePoints) {
+    public static String getBadge(Integer gamePoints) {
         if (null != gamePoints) {
             Map<String, Pair<Integer, Integer>> pointBadgeMappings = getPointBadgeMappings();
 

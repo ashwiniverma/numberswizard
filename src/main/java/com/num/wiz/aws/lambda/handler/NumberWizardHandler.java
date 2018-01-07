@@ -18,11 +18,11 @@ public class NumberWizardHandler extends SpeechletRequestStreamHandler {
          * Alexa Skill and put the relevant Application Ids in this Set.
          */
         supportedApplicationIds = new HashSet<String>();
-        // supportedApplicationIds.add("[unique-value-here]");
+        //supportedApplicationIds.add("amzn1.ask.skill.11138778-16ea-4e89-bd71-9befda6bfafa");
     }
 
     public NumberWizardHandler() {
-        super(new NumberWizardBySpeechlet(), supportedApplicationIds);
+        super(new NumberWizardSpeechIntent(), supportedApplicationIds);
         log.info("inside constructor");
     }
 }

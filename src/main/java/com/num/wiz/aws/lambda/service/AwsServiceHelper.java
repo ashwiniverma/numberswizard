@@ -1,19 +1,20 @@
-package com.num.wiz.aws.lambda.handler;
+package com.num.wiz.aws.lambda.service;
 
+import com.amazon.speech.speechlet.Session;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
-import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.google.gson.Gson;
+import com.num.wiz.aws.lambda.constants.Constants;
 import com.num.wiz.aws.lambda.models.NumberWizardModel;
+import com.num.wiz.aws.lambda.service.enums.GameType;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 
 public class AwsServiceHelper {
@@ -23,7 +24,7 @@ public class AwsServiceHelper {
     private static DynamoDB dynamoDB;
     private static String imageUrl = "";
 
-    protected static List<NumberWizardModel> getSavedGame(String userId) {
+    public static List<NumberWizardModel> getSavedGame(String userId) {
         Table table = getDynamoDbClient().getTable(RECOGNITION_TABLE);
         ScanSpec scanSpec = new ScanSpec()
                 .withFilterExpression("user_id = :val1")
@@ -48,7 +49,7 @@ public class AwsServiceHelper {
         return userDataList;
     }
 
-    protected static void updateDataIntoDb(NumberWizardModel jsonStringData) {
+    public static void updateDataIntoDb(NumberWizardModel jsonStringData) {
         try {
             Table table = getDynamoDbClient().getTable(RECOGNITION_TABLE);
             Item item = new Item();
@@ -70,6 +71,27 @@ public class AwsServiceHelper {
             dynamoDB = new DynamoDB(client);
         }
         return dynamoDB;
+    }
+
+    public static void saveRecordToDb(Session session) {
+        log.info("Inside Save Record to db");
+        //INFO get the score and the update the db, also calculate the badge
+        String gameName = (String) session.getAttribute(Constants.GAME_NAME_SESSION_ATTRIBUTE);
+        String gameLevel = (String) session.getAttribute(Constants.GAME_LEVEL_SESSION_ATTRIBUTE);
+        String userId = session.getUser().getUserId();
+        Integer totalScore = (Integer) session.getAttribute(Constants.GAME_POINTS_SESSION_ATTRIBUTE);
+        String nickName = (String) session.getAttribute(Constants.USER_NAME_SESSION_ATTRIBUTE);
+
+        if (StringUtils.isNotBlank(gameName) && StringUtils.isNotBlank(gameLevel) && StringUtils.isNotBlank(userId) && StringUtils.isNotBlank(nickName)) {
+            NumberWizardModel numberWizardModel = new NumberWizardModel();
+            numberWizardModel.setUser_id(userId);
+            numberWizardModel.setSaved_games(gameName.toUpperCase()+PointsMappingService.SEPARATOR+gameLevel);
+            numberWizardModel.setNickname(nickName);
+            numberWizardModel.setProfile_score((null == totalScore) ? 0 : totalScore);
+            numberWizardModel.setProfile_badge(PointsMappingService.getBadge(totalScore));
+            updateDataIntoDb(numberWizardModel);
+            log.info("Saved Record to db", numberWizardModel, session.getSessionId());
+        }
     }
 
     public static String getImageUrl(){

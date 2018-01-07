@@ -1,13 +1,17 @@
-package com.num.wiz.aws.lambda.handler;
+package com.num.wiz.aws.lambda.service;
 
+import com.num.wiz.aws.lambda.service.enums.GameType;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class MathHelper {
+public class MathHelperService {
 
-
+    private static final Logger logger = LoggerFactory.getLogger(MathHelperService.class);
     public static Triple getTheGameForLevel(String gameType, String level) {
         Triple triple = null;
         if (GameType.ADDITION.name().equalsIgnoreCase(gameType)) {
@@ -128,6 +132,17 @@ public class MathHelper {
         }
         triple = new ImmutableTriple(leftValue,rightValue,result);
         return triple;
+    }
+
+    public static int getWinningScore(String gameNameAndLevel, Integer currentScore) {
+        if (null == currentScore) {
+            currentScore = 0;
+        }
+        int points;
+        Map<String, Integer> pointsForGameMapping = PointsMappingService.getPointGameMapping();
+        points = pointsForGameMapping.get(gameNameAndLevel);
+        logger.info("Inside getWinningScore method, for game name and level {}", gameNameAndLevel);
+        return points+currentScore;
     }
 
     public static int getSingleDigitNumber() {

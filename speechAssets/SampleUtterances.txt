@@ -5,6 +5,7 @@ NickNameCapture {USNickName} here
 NickNameCapture this is {USNickName}
 GameNameCapture play {GameNames} game
 GameNameCapture {GameNames}
+GameNameCapture I want to play {GameNames}
 GameNameCapture begin with {GameNames}
 GameNameCapture start with {GameNames}
 GameLevelCapture {GameLevel}
@@ -14,6 +15,7 @@ GameLevelCapture begin with level {GameLevel}
 GameLevelCapture start with {GameLevel}
 GameLevelCapture start with level {GameLevel}
 GameLevelCapture I want difficulty level {GameLevel}
+GameLevelCapture I want {GameLevel}
 GameStarted result is {GameResult}
 GameStarted answer is {GameResult}
 GameStarted correct answer is {GameResult}
