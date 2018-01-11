@@ -23,7 +23,7 @@ public class InprogressHandlerIntent implements IntentRequestHandler {
     public static final String REPROMPT_GAME_TEXT = "What is the result when %s %s %s";
     public static final String GAME_RESULT_CORRECT_TEXT = "You are right, the result is %s . Alright!! ";
     public static final String GAME_RESULT_WRONG_TEXT = "Sorry it's the wrong answer. The correct answer is %s . Alright!!";
-    public static final String REPEAT_RESPONSE_TEXT = "Sorry !! I could not capture your response. Please try saying again.";
+    public static final String REPEAT_RESPONSE_TEXT = "Sorry !! I could not capture your response. Please try saying the result again.";
 
 
 
