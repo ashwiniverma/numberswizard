@@ -33,18 +33,24 @@ public class SavedGameHandlerIntent implements IntentRequestHandler {
 
     @Override
     public SpeechletResponse handle(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
-        Session session = requestEnvelope.getSession();
-        String savedGameName = requestEnvelope.getRequest().getIntent().getSlot(Constants.GAME_NAME_INTENT_SLOT).getValue();
-        String savedGameLevel = requestEnvelope.getRequest().getIntent().getSlot(Constants.GAME_LEVEL_INTENT_SLOT).getValue();
-        List<Object> gameList = (List<Object>) session.getAttribute(Constants.USER_DATA_SESSION_ATTRIBUTE);
+        try {
+            Session session = requestEnvelope.getSession();
 
-        if(StringUtils.isNotBlank(savedGameName) && StringUtils.isNotBlank(savedGameLevel)) {
+            String savedGameName = requestEnvelope.getRequest().getIntent().getSlot(Constants.GAME_NAME_INTENT_SLOT).getValue();
+            String savedGameLevel = requestEnvelope.getRequest().getIntent().getSlot(Constants.GAME_LEVEL_INTENT_SLOT).getValue();
+            logger.info("Inside Saved Game Handler with values  {} {}", savedGameName, savedGameLevel);
+            List<Object> gameList = (null == session.getAttribute(Constants.USER_DATA_SESSION_ATTRIBUTE))? null:(List<Object>) session.getAttribute(Constants.USER_DATA_SESSION_ATTRIBUTE);
 
-            int currentGamePreviousScore = GameServiceHelper.getTheCurrentGameScore(gameList,savedGameName.toUpperCase() + PointsMappingService.SEPARATOR + savedGameLevel);
-            session.setAttribute(Constants.GAME_POINTS_SESSION_ATTRIBUTE, currentGamePreviousScore);
-            session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.INPROGRESS.name());
-            String responseString = GameServiceHelper.startTheExistingGame(savedGameName, savedGameLevel, session, LevelHandlerIntent.GAME_START_TEXT);
-            return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE,responseString ,responseString);
+            if(StringUtils.isNotBlank(savedGameName) && StringUtils.isNotBlank(savedGameLevel)) {
+
+                int currentGamePreviousScore = (null == gameList)?0:GameServiceHelper.getTheCurrentGameScore(gameList,savedGameName.toUpperCase() + PointsMappingService.SEPARATOR + savedGameLevel);
+                session.setAttribute(Constants.GAME_POINTS_SESSION_ATTRIBUTE, currentGamePreviousScore);
+                session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.INPROGRESS.name());
+                String responseString = GameServiceHelper.startTheExistingGame(savedGameName, savedGameLevel, session, LevelHandlerIntent.GAME_START_TEXT);
+                return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE,responseString ,responseString);
+            }
+        } catch (Exception e) {
+            logger.info("Inside Saved Game Handler with Exception {} ",e.fillInStackTrace());
         }
         return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE, ResumeHandlerIntent.SAVED_GAME_START_TEXT, ResumeHandlerIntent.SAVED_GAME_START_TEXT);
     }

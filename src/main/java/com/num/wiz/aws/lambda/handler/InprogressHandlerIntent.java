@@ -19,6 +19,8 @@ public class InprogressHandlerIntent implements IntentRequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(InprogressHandlerIntent.class);
     public static final String CONTINUE_GAME_TEXT = "Next question, what is the result when %s %s %s";
+    public static final String FIRST_GAME_TEXT = "Here is your question, what is the result when %s %s %s";
+    public static final String REPROMPT_GAME_TEXT = "What is the result when %s %s %s";
     public static final String GAME_RESULT_CORRECT_TEXT = "You are right, the result is %s . Alright!! ";
     public static final String GAME_RESULT_WRONG_TEXT = "Sorry it's the wrong answer. The correct answer is %s . Alright!!";
     public static final String REPEAT_RESPONSE_TEXT = "Sorry !! I could not capture your response. Please try saying again.";
@@ -43,8 +45,8 @@ public class InprogressHandlerIntent implements IntentRequestHandler {
 
         String gameName = (String) session.getAttribute(Constants.GAME_NAME_SESSION_ATTRIBUTE);
         String gameLevel = (String) session.getAttribute(Constants.GAME_LEVEL_SESSION_ATTRIBUTE);
-        Integer expectedGameResult = (Integer) session.getAttribute(Constants.GAME_TYPE_RESULT_SESSION_ATTRIBUTE);
-        Integer currentGamePoints = (Integer) session.getAttribute(Constants.GAME_POINTS_SESSION_ATTRIBUTE);
+        Integer expectedGameResult = (null == session.getAttribute(Constants.GAME_TYPE_RESULT_SESSION_ATTRIBUTE))? null : (Integer) session.getAttribute(Constants.GAME_TYPE_RESULT_SESSION_ATTRIBUTE);
+        Integer currentGamePoints = (null == session.getAttribute(Constants.GAME_POINTS_SESSION_ATTRIBUTE))? null : (Integer) session.getAttribute(Constants.GAME_POINTS_SESSION_ATTRIBUTE);
         String response = REPEAT_RESPONSE_TEXT;;
         String reprompt;
         try {
@@ -54,7 +56,10 @@ public class InprogressHandlerIntent implements IntentRequestHandler {
                 Triple triple = MathHelperService.getTheGameForLevel(gameName, gameLevel);
                 session.setAttribute(Constants.GAME_TYPE_RESULT_SESSION_ATTRIBUTE, triple.getRight());
 
-                if (String.valueOf(expectedGameResult).equals(actualResult)) { // if answer is correct
+                if (null == expectedGameResult) {
+                    response = String.format(FIRST_GAME_TEXT, triple.getLeft(), GameServiceHelper.getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+
+                } else if (String.valueOf(expectedGameResult).equals(actualResult)) { // if answer is correct
 
                     currentGamePoints = (null == currentGamePoints)? 0 : currentGamePoints;
                     currentGamePoints = MathHelperService.getWinningScore(gameName.toUpperCase() + PointsMappingService.SEPARATOR + gameLevel, currentGamePoints);
@@ -63,12 +68,11 @@ public class InprogressHandlerIntent implements IntentRequestHandler {
 
                     AwsServiceHelper.saveRecordToDb(session);
                     response = String.format(GAME_RESULT_CORRECT_TEXT + CONTINUE_GAME_TEXT, actualResult, triple.getLeft(), GameServiceHelper.getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
-                    reprompt = String.format(CONTINUE_GAME_TEXT, triple.getLeft(), GameServiceHelper.getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
 
                 } else {
                     response = String.format(GAME_RESULT_WRONG_TEXT + CONTINUE_GAME_TEXT, expectedGameResult, triple.getLeft(), GameServiceHelper.getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
-                    reprompt = String.format(CONTINUE_GAME_TEXT, triple.getLeft(), GameServiceHelper.getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
                 }
+                reprompt = String.format(REPROMPT_GAME_TEXT, triple.getLeft(), GameServiceHelper.getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
                 return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE, response, reprompt);
             }
         } catch (NumberFormatException | ClassCastException | NullPointerException e) {

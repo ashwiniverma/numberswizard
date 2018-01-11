@@ -2,10 +2,15 @@
 package com.num.wiz.aws.lambda.service;
 
 import com.amazon.speech.json.SpeechletRequestEnvelope;
+import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.LaunchRequest;
+import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.num.wiz.aws.lambda.constants.Constants;
 import com.num.wiz.aws.lambda.handler.*;
+import com.num.wiz.aws.lambda.service.enums.GameSate;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,5 +60,38 @@ public class HandlerFactory {
 		}
 		return handlers.get(0).handle(envelope);
 		//throw new RuntimeException("Exception Unhandled dispatcher request " + envelope);
+	}
+
+	public static SpeechletResponse validateAndSendToCorrectIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
+		Session session = requestEnvelope.getSession();
+		String intentName = requestEnvelope.getRequest().getIntent().getName();
+//		String gameName = (String)session.getAttribute(Constants.GAME_NAME_SESSION_ATTRIBUTE);
+//		String gameLevel = (String)session.getAttribute(Constants.GAME_LEVEL_SESSION_ATTRIBUTE);
+//		String nickName = (String)session.getAttribute(Constants.USER_NAME_SESSION_ATTRIBUTE);
+
+		if (Constants.GAME_NAME_INTENT.equalsIgnoreCase(intentName)) {
+			session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.GAME_NAME.name());
+			return HandlerFactory.dispatchRequest(requestEnvelope);
+
+		} else if (Constants.GAME_LEVEL_INTENT.equalsIgnoreCase(intentName)) {
+
+			session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.GAME_LEVEL.name());
+			return HandlerFactory.dispatchRequest(requestEnvelope);
+
+		} else if (Constants.NICK_NAME_INTENT.equalsIgnoreCase(intentName)) {
+			session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.STARTED.name());
+			return HandlerFactory.dispatchRequest(requestEnvelope);
+
+		} else if (Constants.GAME_SCORE_INTENT.equalsIgnoreCase(intentName)) {
+			session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.INPROGRESS.name());
+			return HandlerFactory.dispatchRequest(requestEnvelope);
+
+		} else if (Constants.SAVED_GAME_START_INTENT.equalsIgnoreCase(intentName)) {
+			session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.SAVED_GAME.name());
+			return HandlerFactory.dispatchRequest(requestEnvelope);
+
+		} else {
+			return null;
+		}
 	}
 }

@@ -36,6 +36,7 @@ public class NumberWizardSpeechIntent implements SpeechletV2 {
 
     @Override
     public SpeechletResponse onLaunch(SpeechletRequestEnvelope<LaunchRequest> speechletRequestEnvelope) {
+        logger.info("onLaunch requestId={}" ,speechletRequestEnvelope.getRequest().getRequestId());
         return HandlerFactory.dispatchRequest(speechletRequestEnvelope);
     }
 

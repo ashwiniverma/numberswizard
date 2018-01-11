@@ -5,10 +5,21 @@ NickNameCapture {USNickName} here
 NickNameCapture this is {USNickName}
 GameNameCapture play {GameNames} game
 GameNameCapture {GameNames}
+GameNameCapture open Number Wizard and play {GameNames} game
+GameNameCapture start Number Wizard and play {GameNames} game
+GameNameCapture play {GameNames} game
 GameNameCapture I want to play {GameNames}
 GameNameCapture begin with {GameNames}
 GameNameCapture start with {GameNames}
 GameLevelCapture {GameLevel}
+GameLevelCapture alexa open Number Wizard and play {GameLevel} game
+GameLevelCapture open Number Wizard and play {GameLevel} game
+GameLevelCapture start Number Wizard and play {GameLevel} game
+GameLevelCapture play {GameLevel} game
+GameLevelCapture alexa open Number Wizard and play {GameLevel} level game
+GameLevelCapture open Number Wizard and play {GameLevel} level game
+GameLevelCapture start Number Wizard and play {GameLevel} level game
+GameLevelCapture play {GameLevel} game
 GameLevelCapture level {GameLevel}
 GameLevelCapture begin with {GameLevel}
 GameLevelCapture begin with level {GameLevel}
@@ -25,10 +36,20 @@ Resume I want to {GameResume} game
 Resume I want to start a {GameResume} game
 Resume start a {GameResume} game
 Resume I want {GameResume}
-Resume I want to {GameResume} a previous game
-Resume I want to {GameResume} previous game
 Resume {GameResume}
+Resume play a {GameResume}
+SavedGameStart begin with {GameNames} and level {GameLevel}
 SavedGameStart begin with {GameNames} and level {GameLevel}
 SavedGameStart resume {GameNames} and level {GameLevel}
 SavedGameStart {GameNames} with level {GameLevel}
+SavedGameStart play {GameNames} with level {GameLevel}
 SavedGameStart {GameNames} {GameLevel}
+SavedGameStart alexa open Number Wizard and play {GameNames} game with level {GameLevel}
+SavedGameStart alexa open Number Wizard and resume {GameNames} game with level {GameLevel}
+SavedGameStart open Number Wizard and play {GameNames} game with level {GameLevel}
+SavedGameStart start Number Wizard and play {GameNames} game with level {GameLevel}
+SavedGameStart play {GameNames} game with level {GameLevel}
+SavedGameStart alexa open Number Wizard and play {GameLevel} level of {GameNames} game
+SavedGameStart open Number Wizard and play {GameLevel} level of {GameNames} game
+SavedGameStart start Number Wizard and play {GameLevel} level of {GameNames} game
+SavedGameStart play {GameLevel} level of {GameNames} game

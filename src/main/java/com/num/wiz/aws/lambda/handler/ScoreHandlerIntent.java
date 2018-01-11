@@ -18,6 +18,7 @@ public class ScoreHandlerIntent implements IntentRequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ScoreHandlerIntent.class);
     public static final String CONTINUE_GAME_TEXT = "Next question, what is the result when %s %s %s";
+    public static final String NO_GAME_INPROGRESS = "Sorry !! You don't have any game in progress. Let me know which game you want to play? Addition, Subtraction, Multiplication or Division?";
     public static final String GAME_SCORE_TEXT = "Your current score for %s , level %s is %s . You have earned %s badge .";
 
     @Override
@@ -41,6 +42,10 @@ public class ScoreHandlerIntent implements IntentRequestHandler {
         String gameName = (String) session.getAttribute(Constants.GAME_NAME_SESSION_ATTRIBUTE);
         String gameLevel = (String) session.getAttribute(Constants.GAME_LEVEL_SESSION_ATTRIBUTE);
 
+        if (StringUtils.isBlank(gameName) || StringUtils.isBlank(gameLevel) || null == gamePoint) {
+            session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.GAME_NAME.name());
+            return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE, NO_GAME_INPROGRESS, NO_GAME_INPROGRESS);
+        }
 
         String badge = PointsMappingService.getBadge(gamePoint);
         logger.info("GAME_SCORE_INTENT Points={} , gameName={} , gameLevel={} and badge={} ", gamePoint, gameName, gameLevel, badge);

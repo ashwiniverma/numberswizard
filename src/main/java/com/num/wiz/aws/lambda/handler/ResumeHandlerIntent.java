@@ -40,9 +40,9 @@ public class ResumeHandlerIntent implements IntentRequestHandler {
     public SpeechletResponse handle(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
         Session session = requestEnvelope.getSession();
         String gameResumeText = requestEnvelope.getRequest().getIntent().getSlot(Constants.GAME_RESUME_INTENT_SLOT).getValue();
-        String userName = (String)session.getAttribute(Constants.USER_NAME_SESSION_ATTRIBUTE);
+        String userName = (null == session.getAttribute(Constants.USER_NAME_SESSION_ATTRIBUTE))?"":(String)session.getAttribute(Constants.USER_NAME_SESSION_ATTRIBUTE);
         List<Object> gameList = (List<Object>) session.getAttribute(Constants.USER_DATA_SESSION_ATTRIBUTE);
-
+        logger.info("Game resume text {}" , gameResumeText);
         if(StringUtils.isNotBlank(gameResumeText)) {
 
             if (("resume".equalsIgnoreCase(gameResumeText) || "saved".equalsIgnoreCase(gameResumeText)) && (null != gameList || !gameList.isEmpty())) {

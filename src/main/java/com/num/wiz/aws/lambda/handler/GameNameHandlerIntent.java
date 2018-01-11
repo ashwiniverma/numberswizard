@@ -5,6 +5,7 @@ import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.num.wiz.aws.lambda.constants.Constants;
+import com.num.wiz.aws.lambda.service.GameServiceHelper;
 import com.num.wiz.aws.lambda.service.enums.GameSate;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,12 +36,20 @@ public class GameNameHandlerIntent implements IntentRequestHandler {
     public SpeechletResponse handle(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
         Session session = requestEnvelope.getSession();
         String intentName = requestEnvelope.getRequest().getIntent().getName();
+        String gameLevel = (null == session.getAttribute(Constants.GAME_LEVEL_SESSION_ATTRIBUTE)) ? null : (String)session.getAttribute(Constants.GAME_LEVEL_SESSION_ATTRIBUTE);
         try {
             String gameName = requestEnvelope.getRequest().getIntent().getSlot(Constants.GAME_NAME_INTENT_SLOT).getValue();
 
             if (StringUtils.isNotBlank(gameName)) {
                 session.setAttribute(Constants.GAME_NAME_SESSION_ATTRIBUTE, gameName.toUpperCase());
                 session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.GAME_LEVEL.name());
+
+                if(StringUtils.isNotBlank(gameLevel)) {
+                    String responseString = GameServiceHelper.startTheExistingGame(gameName, gameLevel, session, LevelHandlerIntent.GAME_START_TEXT);
+                    session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.INPROGRESS.name());
+                    return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE,responseString ,responseString);
+                }
+                
                 return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE, GAME_PLAY_TEXT, GAME_PLAY_REPROMPT_TEXT);
             }
         } catch (Exception e) {

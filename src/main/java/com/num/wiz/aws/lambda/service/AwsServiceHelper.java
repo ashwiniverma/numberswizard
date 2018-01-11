@@ -54,7 +54,9 @@ public class AwsServiceHelper {
             Table table = getDynamoDbClient().getTable(RECOGNITION_TABLE);
             Item item = new Item();
             item.withPrimaryKey("user_id", jsonStringData.getUser_id());
-            item.withString("nickname", jsonStringData.getNickname());
+            if(StringUtils.isNotBlank(jsonStringData.getNickname())) {
+                item.withString("nickname", jsonStringData.getNickname());
+            }
             item.withString("profile_badge", jsonStringData.getProfile_badge());
             item.withInt("profile_score", jsonStringData.getProfile_score());
             item.withString("saved_games", jsonStringData.getSaved_games());
@@ -80,9 +82,9 @@ public class AwsServiceHelper {
         String gameLevel = (String) session.getAttribute(Constants.GAME_LEVEL_SESSION_ATTRIBUTE);
         String userId = session.getUser().getUserId();
         Integer totalScore = (Integer) session.getAttribute(Constants.GAME_POINTS_SESSION_ATTRIBUTE);
-        String nickName = (String) session.getAttribute(Constants.USER_NAME_SESSION_ATTRIBUTE);
+        String nickName = (null == session.getAttribute(Constants.USER_NAME_SESSION_ATTRIBUTE))?"":(String) session.getAttribute(Constants.USER_NAME_SESSION_ATTRIBUTE);
 
-        if (StringUtils.isNotBlank(gameName) && StringUtils.isNotBlank(gameLevel) && StringUtils.isNotBlank(userId) && StringUtils.isNotBlank(nickName)) {
+        if (StringUtils.isNotBlank(gameName) && StringUtils.isNotBlank(gameLevel) && StringUtils.isNotBlank(userId)) {
             NumberWizardModel numberWizardModel = new NumberWizardModel();
             numberWizardModel.setUser_id(userId);
             numberWizardModel.setSaved_games(gameName.toUpperCase()+PointsMappingService.SEPARATOR+gameLevel);
@@ -93,6 +95,69 @@ public class AwsServiceHelper {
             log.info("Saved Record to db", numberWizardModel, session.getSessionId());
         }
     }
+
+    public static Integer getTheCurrentRank(String userId, String badge, String savedGameName) {
+        Table table = getDynamoDbClient().getTable(RECOGNITION_TABLE);
+        ScanSpec scanSpec = new ScanSpec()
+//                .withFilterExpression("user_id = :val1")
+                .withFilterExpression("profile_badge = :val1 and saved_games = :val2")
+                .withValueMap(new ValueMap().withString(":val1", badge))
+                .withValueMap(new ValueMap().withString(":val2", savedGameName));
+        log.info("Inside the rank method game name {} and badge {}", savedGameName, badge);
+        ItemCollection<ScanOutcome> items = table.scan(scanSpec);
+        Iterator<Item> iter = items.iterator();
+        Map<String, Integer> profileScoreMap = new HashMap<>();
+
+        while (iter.hasNext()) {
+            Item item = iter.next();
+            profileScoreMap.put(item.getString("user_id"), item.getInt("profile_score"));
+        }
+        log.info("Inside the rank method creating the sorted map {}", profileScoreMap);
+        Map<String, Integer> sortedProfileScoreMap = sortByValue(profileScoreMap);
+        log.info("checking out the rank for user {} with badge {}", userId, badge);
+        int rank = 0;
+        for (String key : sortedProfileScoreMap.keySet()) {
+            rank++;
+            if(userId.equals(key)) {
+                break;
+            }
+        }
+        return rank;
+    }
+
+
+    private static Map<String, Integer> sortByValue(Map<String, Integer> unsortMap) {
+
+        // 1. Convert Map to List of Map
+        List<Map.Entry<String, Integer>> list =
+                new LinkedList<Map.Entry<String, Integer>>(unsortMap.entrySet());
+
+        // 2. Sort list with Collections.sort(), provide a custom Comparator
+        //    Try switch the o1 o2 position for a different order
+        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+            public int compare(Map.Entry<String, Integer> o1,
+                               Map.Entry<String, Integer> o2) {
+                return (o1.getValue()).compareTo(o2.getValue());
+            }
+        });
+
+        // 3. Loop the sorted list and put it into a new insertion order Map LinkedHashMap
+        Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
+        for (Map.Entry<String, Integer> entry : list) {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+
+        /*
+        //classic iterator example
+        for (Iterator<Map.Entry<String, Integer>> it = list.iterator(); it.hasNext(); ) {
+            Map.Entry<String, Integer> entry = it.next();
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }*/
+
+
+        return sortedMap;
+    }
+
 
     public static String getImageUrl(){
         return imageUrl;

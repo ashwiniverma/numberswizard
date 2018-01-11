@@ -33,12 +33,16 @@ public class HelpHandlerIntent implements IntentRequestHandler {
     public SpeechletResponse handle(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
         Session session = requestEnvelope.getSession();
         String intentName = requestEnvelope.getRequest().getIntent().getName();
+
         if("AMAZON.StopIntent".equalsIgnoreCase(intentName) || "AMAZON.CancelIntent".equalsIgnoreCase(intentName)) {
             session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.END.name());
             logger.info("Inside intentName={}", intentName);
             Integer totalScore = (Integer) session.getAttribute(Constants.GAME_POINTS_SESSION_ATTRIBUTE);
+            String gameName = (String) session.getAttribute(Constants.GAME_NAME_SESSION_ATTRIBUTE);
+            String gameLevel = (String) session.getAttribute(Constants.GAME_LEVEL_SESSION_ATTRIBUTE);
             totalScore = totalScore == null? 0:totalScore;
             String badge = PointsMappingService.getBadge(totalScore);
+            //int rank = AwsServiceHelper.getTheCurrentRank(requestEnvelope.getSession().getUser().getUserId(),badge, gameName.toUpperCase()+PointsMappingService.SEPARATOR+gameLevel);
 
             String goodByeMessage = String.format(GAME_EXIT_MESSAGE, totalScore, badge);
             logger.info("Good Bye Message {}", goodByeMessage);

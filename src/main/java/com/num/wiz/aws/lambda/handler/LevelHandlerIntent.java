@@ -19,6 +19,7 @@ public class LevelHandlerIntent implements IntentRequestHandler {
     private static final Logger logger = LoggerFactory.getLogger(LevelHandlerIntent.class);
     public static final String GAME_START_TEXT = "In this level you will be challenged to answer %s of numbers. You will be scoring %s points for each correct answers. Let's start, what is the result when %s %s %s";
     public static final String GAME_LEVEL_REPROMPT_TEXT = "Please tell me which difficulty level you want? Choose one from easy, medium and hard.";
+    public static final String GAME_LEVEL_ERROR = "Please start games by saying, game name and then the level . Like, Addition with level Easy .";
 
     @Override
     public boolean canHandle(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
@@ -41,6 +42,11 @@ public class LevelHandlerIntent implements IntentRequestHandler {
         try {
         if(StringUtils.isNotBlank(gameLevel)) {
             String gameName = (String)session.getAttribute(Constants.GAME_NAME_SESSION_ATTRIBUTE);
+
+            if(StringUtils.isBlank(gameName)) {
+                return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE, GAME_LEVEL_ERROR, GAME_LEVEL_ERROR);
+            }
+
             Triple triple = MathHelperService.getTheGameForLevel(gameName, gameLevel);
 
             session.setAttribute(Constants.GAME_LEVEL_SESSION_ATTRIBUTE, gameLevel);
@@ -53,7 +59,7 @@ public class LevelHandlerIntent implements IntentRequestHandler {
             return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE, responseString, responseString);
         }
         } catch (Exception e) {
-            logger.error("Exception in handling the intent {}", intentName);
+            logger.error("Exception in handling the intent {} with exception {}", intentName, e.fillInStackTrace());
         }
         return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE, GAME_LEVEL_REPROMPT_TEXT, GAME_LEVEL_REPROMPT_TEXT);
 
