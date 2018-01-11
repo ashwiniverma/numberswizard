@@ -23,6 +23,7 @@ public class WelcomeHandlerIntent implements IntentRequestHandler {
             "You will be scoring points for each correct answer and 0 points for a wrong answer. Based on your points you will be ranked and also achieve the badges starting from Newbie," +
             "Novice,Graduate,Expert,Master and Guru.  But first, I would like to get to know you better. Tell me your nickname by saying, My nickname is, and then your nickname.";
     public static final String GAME_RESUME_TEXT = "Welcome Back %s , to Number Wizard! Please say New game to start a new game or say resume to continue playing the previous game.";
+    public static final String GAME_NAME_CAPTURE_TEXT = "Before starting the game, I would like to get to know you better. Tell me your nickname by saying, My nickname is, and then your nickname.";
 
 
     @Override
@@ -55,6 +56,7 @@ public class WelcomeHandlerIntent implements IntentRequestHandler {
             String nickName = (null == userDataList.get(0).getNickname())?"":userDataList.get(0).getNickname();
             session.setAttribute(Constants.USER_NAME_SESSION_ATTRIBUTE,nickName);
             session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.RESUME.name());
+
             if (requestEnvelope.getRequest() instanceof IntentRequest) {
                 response = HandlerFactory.validateAndSendToCorrectIntent(requestEnvelope);
             }

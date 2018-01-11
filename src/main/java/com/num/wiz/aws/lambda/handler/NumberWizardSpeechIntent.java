@@ -52,7 +52,7 @@ public class NumberWizardSpeechIntent implements SpeechletV2 {
         AwsServiceHelper.saveRecordToDb(session);
     }
 
-    protected static SpeechletResponse getAskResponse(String cardTitle, String speechText, String repromptString) {
+    public static SpeechletResponse getAskResponse(String cardTitle, String speechText, String repromptString) {
         StandardCard standardCard = new StandardCard();
 
         if (StringUtils.isNotBlank(AwsServiceHelper.getImageUrl())) {
