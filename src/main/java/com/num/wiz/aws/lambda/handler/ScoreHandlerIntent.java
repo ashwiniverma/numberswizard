@@ -52,8 +52,8 @@ public class ScoreHandlerIntent implements IntentRequestHandler {
 
         Triple triple = MathHelperService.getTheGameForLevel(gameName, gameLevel);
         session.setAttribute(Constants.GAME_TYPE_RESULT_SESSION_ATTRIBUTE, triple.getRight());
-        session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.INPROGRESS.name());
         String continueGame = String.format(CONTINUE_GAME_TEXT, triple.getLeft(), GameServiceHelper.getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
+        session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.INPROGRESS.name());
         String score = String.format(GAME_SCORE_TEXT, gameName, gameLevel, gamePoint, badge);
 
         return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE, score+continueGame, continueGame);

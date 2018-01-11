@@ -46,6 +46,7 @@ public class AwsServiceHelper {
             numberWizardModel.setUser_id(item.getString("user_id"));
             userDataList.add(numberWizardModel);
         }
+        log.info("Record fetched for user {} with size {}",userId,userDataList.size());
         return userDataList;
     }
 

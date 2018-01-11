@@ -42,14 +42,13 @@ public class GameNameHandlerIntent implements IntentRequestHandler {
 
             if (StringUtils.isNotBlank(gameName)) {
                 session.setAttribute(Constants.GAME_NAME_SESSION_ATTRIBUTE, gameName.toUpperCase());
-                session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.GAME_LEVEL.name());
 
                 if(StringUtils.isNotBlank(gameLevel)) {
                     String responseString = GameServiceHelper.startTheExistingGame(gameName, gameLevel, session, LevelHandlerIntent.GAME_START_TEXT);
                     session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.INPROGRESS.name());
                     return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE,responseString ,responseString);
                 }
-                
+                session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.GAME_LEVEL.name());
                 return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE, GAME_PLAY_TEXT, GAME_PLAY_REPROMPT_TEXT);
             }
         } catch (Exception e) {

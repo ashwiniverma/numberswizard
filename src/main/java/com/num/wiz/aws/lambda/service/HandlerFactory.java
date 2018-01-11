@@ -70,9 +70,12 @@ public class HandlerFactory {
 //		String gameLevel = (String)session.getAttribute(Constants.GAME_LEVEL_SESSION_ATTRIBUTE);
 //		String nickName = (String)session.getAttribute(Constants.USER_NAME_SESSION_ATTRIBUTE);
 
-        if (null == gameList && (Constants.GAME_NAME_INTENT.equalsIgnoreCase(intentName)) || Constants.GAME_LEVEL_INTENT.equalsIgnoreCase(intentName)
-                || Constants.NICK_NAME_INTENT.equalsIgnoreCase(intentName) || Constants.SAVED_GAME_START_INTENT.equalsIgnoreCase(intentName)) {
-            return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE, WelcomeHandlerIntent.GAME_NAME_CAPTURE_TEXT, null);
+        if (null == gameList && (Constants.GAME_NAME_INTENT.equalsIgnoreCase(intentName) || Constants.GAME_LEVEL_INTENT.equalsIgnoreCase(intentName)
+                || Constants.NICK_NAME_INTENT.equalsIgnoreCase(intentName) || Constants.SAVED_GAME_START_INTENT.equalsIgnoreCase(intentName))) {
+
+			session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.GAME_NAME.name());
+        	return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE, WelcomeHandlerIntent.GAME_NAME_CAPTURE_TEXT, null);
+
         } else if (Constants.GAME_NAME_INTENT.equalsIgnoreCase(intentName)) {
 			session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.GAME_NAME.name());
 			return HandlerFactory.dispatchRequest(requestEnvelope);

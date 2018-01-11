@@ -50,12 +50,11 @@ public class LevelHandlerIntent implements IntentRequestHandler {
             Triple triple = MathHelperService.getTheGameForLevel(gameName, gameLevel);
 
             session.setAttribute(Constants.GAME_LEVEL_SESSION_ATTRIBUTE, gameLevel);
-            session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.INPROGRESS.name());
             session.setAttribute(Constants.GAME_TYPE_RESULT_SESSION_ATTRIBUTE, triple.getRight());
 
             Integer points = PointsMappingService.getPointGameMapping().get(gameName + PointsMappingService.SEPARATOR + gameLevel);
             String responseString = String.format(GAME_START_TEXT, gameName, points, triple.getLeft(), GameServiceHelper.getGameJarganMap().get(gameName.toUpperCase()), triple.getMiddle());
-
+            session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.INPROGRESS.name());
             return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE, responseString, responseString);
         }
         } catch (Exception e) {

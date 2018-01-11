@@ -45,8 +45,8 @@ public class SavedGameHandlerIntent implements IntentRequestHandler {
 
                 int currentGamePreviousScore = (null == gameList)?0:GameServiceHelper.getTheCurrentGameScore(gameList,savedGameName.toUpperCase() + PointsMappingService.SEPARATOR + savedGameLevel);
                 session.setAttribute(Constants.GAME_POINTS_SESSION_ATTRIBUTE, currentGamePreviousScore);
-                session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.INPROGRESS.name());
                 String responseString = GameServiceHelper.startTheExistingGame(savedGameName, savedGameLevel, session, LevelHandlerIntent.GAME_START_TEXT);
+                session.setAttribute(Constants.GAME_STATE_SESSION_ATTRIBUTE, GameSate.INPROGRESS.name());
                 return NumberWizardSpeechIntent.getAskResponse(Constants.CARD_TITLE,responseString ,responseString);
             }
         } catch (Exception e) {
