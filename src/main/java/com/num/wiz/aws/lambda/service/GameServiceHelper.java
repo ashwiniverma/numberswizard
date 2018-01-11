@@ -42,7 +42,7 @@ public class GameServiceHelper {
     public static Map getGameJarganMap() {
         if (GAME_JARGAN_MAP.size() != 4) {
             GAME_JARGAN_MAP.put(GameType.ADDITION.name(), "added to");
-            GAME_JARGAN_MAP.put(GameType.SUBTRACTION.name(), "subtracted from");
+            GAME_JARGAN_MAP.put(GameType.SUBTRACTION.name(), "minus");
             GAME_JARGAN_MAP.put(GameType.MULTIPLICATION.name(), "multiplied by");
             GAME_JARGAN_MAP.put(GameType.DIVISION.name(), "divided");
         }
