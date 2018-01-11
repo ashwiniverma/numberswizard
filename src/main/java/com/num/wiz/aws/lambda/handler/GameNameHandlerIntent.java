@@ -41,6 +41,9 @@ public class GameNameHandlerIntent implements IntentRequestHandler {
             String gameName = requestEnvelope.getRequest().getIntent().getSlot(Constants.GAME_NAME_INTENT_SLOT).getValue();
 
             if (StringUtils.isNotBlank(gameName)) {
+                if(gameName.equalsIgnoreCase("edition") || gameName.equalsIgnoreCase("dition") || gameName.equalsIgnoreCase("eddition")) {
+                    gameName = "addition";
+                }
                 session.setAttribute(Constants.GAME_NAME_SESSION_ATTRIBUTE, gameName.toUpperCase());
 
                 if(StringUtils.isNotBlank(gameLevel)) {
